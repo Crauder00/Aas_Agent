@@ -13,7 +13,10 @@ or directly connected sensors)
 The agent continuously monitors AAS-related events and maps them to executable operations.
 
 ## Software Architecture
-![saljdhfouahuohfiu awuh](docs/images/SoftwareArchitektur.png)
+<!-- ![Image of software architecture](docs/images/SoftwareArchitektur.png) -->
+<p align="center">
+  <img src="docs/images/SoftwareArchitektur.png" alt="Software Architektur" />
+</p>
 
 While platforms like [Eclipse BaSyx™](https://basyx.org/) provide a solid foundation for managing AAS data (Type 1), they do not natively support reactive or autonomous behavior.
 
