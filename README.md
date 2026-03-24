@@ -12,11 +12,7 @@ or directly connected sensors)
 
 The agent continuously monitors AAS-related events and maps them to executable operations.
 
-## Software Architecture
-<!-- ![Image of software architecture](docs/images/SoftwareArchitektur.png) -->
-<p align="center">
-  <img src="docs/images/SoftwareArchitektur.png" alt="Software Architektur" />
-</p>
+## Why use an AAS Agent?
 
 While platforms like [Eclipse BaSyx™](https://basyx.org/) provide a solid foundation for managing AAS data (Type 1), they do not natively support reactive or autonomous behavior.
 
@@ -26,3 +22,9 @@ The AAS Agent is an exemplary implementation to close this gap through the intro
 - automated execution of operational routines
 
 This turns a passive digital model (Type 1) not only in a digital shadow (Type 2) but into an active digital twin (Type 3).
+
+## Software Architecture
+<!-- ![Image of software architecture](docs/images/SoftwareArchitektur.png) -->
+<p align="center">
+  <img src="docs/images/SoftwareArchitektur.png" alt="Software Architektur" />
+</p>
