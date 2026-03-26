@@ -48,21 +48,7 @@ class EventHandler:
         if len(parts) >= 7 and parts[6] == "updated":
             return parts[5]
         return None
-
+        
     def _dispatch(self, operation_name: str) -> None:
-        """Schickt die Operation in den ThreadPool."""
-        if operation_name == "trigger_aggregation":
-            # Altes Stop-Event zurücksetzen bevor neuer Lauf startet
-            self._stop_aggregation.clear()
-            self._executor.submit(
-                self._service.trigger_aggregation,
-                self._stop_aggregation,
-            )
-        elif operation_name == "reset_aggregation":
-            # Stop-Signal an laufende Aggregation senden
-            self._stop_aggregation.set()
-            self._executor.submit(self._service.reset_aggregation)
-        else:
-            # Alle anderen Operationen: direkt in Thread-Pool
-            method = getattr(self._service, operation_name)
-            self._executor.submit(method)
+        method = getattr(self._service, operation_name)
+        self._executor.submit(method) 

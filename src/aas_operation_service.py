@@ -14,6 +14,7 @@ class AasOperationService:
 
     def __init__(self, config: AasConfig):
         self._config = config
+        self._stop_aggregation = threading.Event()
 
     def set_emission_factor(self) -> None:
         logger.info("[STUB] set_emission_factor() aufgerufen")
@@ -23,17 +24,15 @@ class AasOperationService:
         logger.info("[STUB] set_scope3_proxy() aufgerufen")
         print("  → set_scope3_proxy(): würde Scope3-Proxy Wert aktualisieren")
 
-    def reset_aggregation(self) -> None:
-        logger.info("[STUB] reset_aggregation() aufgerufen")
-        print("  → reset_aggregation(): würde laufende Aggregation abbrechen")
-
-    def trigger_aggregation(self, stop_event: threading.Event) -> None:
-        logger.info("[STUB] trigger_aggregation() aufgerufen")
-        print("  → trigger_aggregation(): würde Aggregation starten (~1 min)")
-        # Simuliert einen langen Lauf — prüft alle 5s ob abgebrochen werden soll
+    def trigger_aggregation(self) -> None:
+        self._stop_aggregation.clear()             
+        # ... Aggregationslogik ...
         for i in range(12):
-            if stop_event.wait(timeout=5):
-                print("  → trigger_aggregation(): abgebrochen via stop_event")
+            if self._stop_aggregation.wait(timeout=5):
+                print("  → abgebrochen")
                 return
-            print(f"  → trigger_aggregation(): läuft... ({(i+1)*5}s)")
-        print("  → trigger_aggregation(): abgeschlossen")
+            print(f"  → läuft... ({(i+1)*5}s)")
+
+    def reset_aggregation(self) -> None:
+        self._stop_aggregation.set()              
+        print("  → reset_aggregation(): Aggregation gestoppt")

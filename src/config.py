@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional
 
 # Mapping von idShort (Kleinbuchstaben) zu Methodenname in AasOperationService
