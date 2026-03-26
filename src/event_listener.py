@@ -46,9 +46,9 @@ class EventListener:
     def _handle_connect(self, client, userdata, flags, rc) -> None:
         if rc == 0:
             logger.info("MQTT verbunden, abonniere Topics...")
-            # client.subscribe(self._config.topic_filter)
-            for topic in self._config.topic_filters:
-                client.subscribe(topic)
+            client.subscribe(self._config.topic_filter)
+            # for topic in self._config.topic_filters:
+                # client.subscribe(topic)
         else:
             logger.error(f"MQTT Verbindung fehlgeschlagen, Code: {rc}")
 

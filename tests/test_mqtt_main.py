@@ -1,3 +1,13 @@
+# Define logging configuration
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)-8s] %(name)s — %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+# Testet die MQTT-Verbindung und das Empfangs-Callback mit einem Dummy-Handler.
 from src.config import AgentConfig
 from src.event_listener import EventListener
 
