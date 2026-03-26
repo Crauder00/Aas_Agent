@@ -2,17 +2,9 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from .aas_operation_service import AasOperationService
+from .config import TOPIC_OPERATION_MAP # Mapping: idShortPath → Methodenname im AasOperationService
 
 logger = logging.getLogger(__name__)
-
-# Mapping: idShortPath → Methodenname im AasOperationService
-TOPIC_OPERATION_MAP = {
-    "emissionfactor":   "set_emission_factor",
-    "scope3proxy":      "set_scope3_proxy",
-    "resetaggregation": "reset_aggregation",
-    "triggeraggregation": "trigger_aggregation",
-}
-
 
 class EventHandler:
     """
@@ -23,10 +15,9 @@ class EventHandler:
 
     def __init__(self, operation_service: AasOperationService):
         self._service = operation_service
-        # Max 2 gleichzeitige Operationen — genug für schwache Hardware
-        self._executor = ThreadPoolExecutor(max_workers=2)
-        # Event um laufende Aggregation von aussen stoppen zu können
-        self._stop_aggregation = threading.Event()
+        self._operation_map = TOPIC_OPERATION_MAP
+        self._executor = ThreadPoolExecutor(max_workers=2) # Max 2 gleichzeitige Operationen — genug für schwache Hardware
+        self._stop_aggregation = threading.Event() # Event um laufende Aggregation von aussen stoppen zu können
 
     # ── Öffentliche Methoden ──────────────────────────────
 
@@ -37,7 +28,7 @@ class EventHandler:
             logger.warning(f"Topic konnte nicht geparst werden: {topic}")
             return
 
-        operation_name = TOPIC_OPERATION_MAP.get(id_short.lower())
+        operation_name = self._operation_map.get(id_short.lower())
         if operation_name is None:
             logger.debug(f"Kein Handler für idShort: '{id_short}' — ignoriert")
             return

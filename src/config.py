@@ -1,5 +1,13 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
+
+# Mapping von idShort (Kleinbuchstaben) zu Methodenname in AasOperationService
+TOPIC_OPERATION_MAP = {
+    "emissionfactor":     "set_emission_factor",
+    "scope3proxy":        "set_scope3_proxy",
+    "resetaggregation":   "reset_aggregation",
+    "triggeraggregation": "trigger_aggregation",
+}
 
 @dataclass
 class MqttConfig:
