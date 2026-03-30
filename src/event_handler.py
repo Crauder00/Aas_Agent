@@ -10,14 +10,12 @@ class EventHandler:
     """
     Empfängt Topic + Payload vom EventListener.
     Entscheidet welche Operation ausgelöst wird.
-    Langläufer (Aggregation) laufen in einem eigenen Thread.
     """
 
     def __init__(self, operation_service: AasOperationService):
         self._service = operation_service
         self._operation_map = TOPIC_OPERATION_MAP
         self._executor = ThreadPoolExecutor(max_workers=2) # Max 2 gleichzeitige Operationen — genug für schwache Hardware
-        self._stop_aggregation = threading.Event() # Event um laufende Aggregation von aussen stoppen zu können
 
     # ── Öffentliche Methoden ──────────────────────────────
 

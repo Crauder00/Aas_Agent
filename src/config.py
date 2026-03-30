@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 # Mapping von idShort (Kleinbuchstaben) zu Methodenname in AasOperationService
@@ -25,18 +25,36 @@ class MqttConfig:
     #             "sm-repository/sm-repo/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vNTY1MF85MTM0XzQ5MzhfNDM0MA/submodelElements/Operations[1]/updated",
     #         ]
 
+@dataclass
+class AasSensorConfig:
+    sensor_url_sm_repository: str = "http://192.168.1.101:8081"
+    # Submodel-ID deines Sensor-Submodels
+    sensor_submodel_id: str = "http://example.com/id/sm/..."  
+    # idShort des Elements im Sensor-Submodel, z.B. "temperature"
+    sensor_submodelelement_id_short: str = "energyvalue"
 
 @dataclass
 class AasConfig:
-    base_url: str = "http://192.168.1.128:8080"
-    # Submodel-ID deines Emission-Submodels (Base64URL-encoded)
-    emission_submodel_id: str = "your-submodel-id-base64"
+    base_url_sm_repository: str = "http://192.168.1.128:8081"
+    # Submodel-IDs
+    emission_submodel_id: str = "http://example.com/id/sm/..."
+    emission_submodelelement_id_short: str = "emissionfactor"
+
+    scope3_proxy_submodel_id: str = "http://example.com/id/sm/..."
+    scope3_proxy_submodelelement_id_short: str = "scope3proxy"
+
+    aggregation_submodel_id: str = "http://example.com/id/sm/..."
+    aggregation_submodelelement_id_short: str = "aggregationvalue"
+
+    #verknüpfte Config für Sensor-AAS
+    sensor: AasSensorConfig = field(default_factory=AasSensorConfig)
 
 
 @dataclass
 class AgentConfig:
     mqtt: MqttConfig = None
     aas: AasConfig = None
+    aas_sensor: AasSensorConfig = None
 
     def __post_init__(self):
         # Defaults setzen falls nichts übergeben wurde
@@ -44,3 +62,5 @@ class AgentConfig:
             self.mqtt = MqttConfig()
         if self.aas is None:
             self.aas = AasConfig()
+        if self.aas_sensor is None:
+            self.aas_sensor = AasSensorConfig()
