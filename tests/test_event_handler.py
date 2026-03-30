@@ -9,8 +9,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)-8s] %(name)s — %(message)s",
     datefmt="%H:%M:%S",
 )
-
-# ── Start ─────────────────────────────────────────────────────────────────────
+# testet die EventHandler-Logik und einfachen AAS-Operationen mit realen Mqtt-Nachrichten
 
 config = AgentConfig()
 service = AasOperationService(config.aas)
