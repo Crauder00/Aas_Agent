@@ -1,5 +1,6 @@
 # Define logging configuration
 import logging
+import random
 
 logging.basicConfig(
     level=logging.WARNING,  # Set to DEBUG for more detailed output
@@ -8,25 +9,23 @@ logging.basicConfig(
 )
 
 from src.utils.aas_sm_http_client import AasSmHttpClient
+import time
 
 # ── Konfiguration ──────────────────────────────────────────────────────────────
-BASE_URL    = "http://192.168.1.128:8081"   # <-- anpassen
-SUBMODEL_ID = "https://example.com/ids/sm/6218_8934_1526_1612"      # <-- anpassen
-ID_SHORT    = "emissionfactor"            # <-- anpassen
-NEW_VALUE   = 0.059                       # <-- Testwert für PATCH
+BASE_URL    = "http://192.168.1.101:8081"   # <-- anpassen
+SUBMODEL_ID = "https://example.com/ids/sm/4339_7297_3282_2812"      # <-- anpassen
+ID_SHORT    = "energyvalue"            # <-- anpassen
 # ──────────────────────────────────────────────────────────────────────────────
 
 client = AasSmHttpClient(BASE_URL)
 
-print("=== GET-Wert vor Änderung ===")
-value = client.get_value(SUBMODEL_ID, ID_SHORT)
-print(f"Gelesener Wert: {value}")
-
-print("=== SET-Wert ===")
-success = client.set_value(SUBMODEL_ID, ID_SHORT, NEW_VALUE)
-print(f"Wert aktualisiert: {success}")
-
-print("=== GET-Wert nach Änderung ===")
-value = client.get_value(SUBMODEL_ID, ID_SHORT)
-print(f"Gelesener Wert: {value}")
-
+try:
+    while True:
+        value = client.get_value(SUBMODEL_ID, ID_SHORT)
+        print(f"ausgelesener Wert : {value}")
+        value = random.uniform(0.0, 1.0)  # Generiere einen zufälligen Wert zwischen 0.0 und 1.0
+        print(f"generierter Wert  : {value}")
+        ok = client.set_value(SUBMODEL_ID, ID_SHORT, value)
+        time.sleep(2)
+except KeyboardInterrupt:
+    print("\nStopped by user")

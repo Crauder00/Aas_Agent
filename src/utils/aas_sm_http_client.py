@@ -65,7 +65,7 @@ class AasSmHttpClient:
         """
         url = self._element_url(submodel_id, id_short)
         try:
-            response = self._session.patch(url, json=value, timeout=10)
+            response = self._session.patch(url, json=str(value), timeout=10)
             response.raise_for_status()
 
             logger.debug(f"Wert '{id_short}' erfolgreich auf '{value}' gesetzt")

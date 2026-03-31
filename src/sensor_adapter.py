@@ -1,6 +1,6 @@
 import logging
 from .config import AasSensorConfig
-from .aas_sm_http_client import AasSmHttpClient
+from .utils.aas_sm_http_client import AasSmHttpClient
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class SensorAdapter:
 
         self._sensor_client = AasSmHttpClient(self._config.sensor_url_sm_repository) # Client für Sensor-AAS werte
 
-    def get_sensor_reading(self, id_short: str) -> str | None:
+    def get_sensor_reading(self) -> str | None:
         """
         Liest einen Sensorwert vom externen AAS Server.
 
@@ -26,7 +26,11 @@ class SensorAdapter:
         Returns:
             Wert als String, oder None bei Fehler
         """
-        return self._sensor_client.get_value(
+        try:
+            return self._sensor_client.get_value(
             self._config.sensor_submodel_id,
             self._config.sensor_submodelelement_id_short
-        )
+            )
+        except Exception as e:
+            logger.error(f"Failed to get sensor reading: {e}")
+            return None

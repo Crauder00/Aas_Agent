@@ -1,12 +1,16 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-# Mapping von idShort (Kleinbuchstaben) zu Methodenname in AasOperationService
+@dataclass
+class TopicConfig:
+    method: str
+    execute_when: str = "everytime"  # everytime | onlyontrue | onlyonfalse | never
+
 TOPIC_OPERATION_MAP = {
-    "emissionfactor":     "set_emission_factor",
-    "scope3proxy":        "set_scope3_proxy",
-    "resetaggregation":   "reset_aggregation",
-    "triggeraggregation": "trigger_aggregation",
+    "emissionfactor":     TopicConfig("set_emission_factor",  "everytime"),
+    "scope3proxy":        TopicConfig("set_scope3_proxy",     "everytime"),
+    "resetaggregation":   TopicConfig("reset_aggregation",    "onlyontrue"),
+    "triggeraggregation": TopicConfig("trigger_aggregation",  "onlyontrue"),
 }
 
 @dataclass
@@ -15,9 +19,11 @@ class MqttConfig:
     port: int = 1883
     # Topic-Pattern vom BaSyx Server
     topic_filter: str = "sm-repository/+/submodels/+/submodelElements/+/updated"
-    topic_filters: Optional[List[str]] = None
+    # topic_filters: Optional[List[str]] = None
     client_id: str = "aas-agent"
 
+    # TODO: mehrere topic_filter unterstützen, z.B. für spezifische Submodelle oder Elemente
+    # TODO: submodel id filter anstelle von "+"
     # def __post_init__(self):
     #     if self.topic_filters is None:
     #         self.topic_filters = [
@@ -29,7 +35,7 @@ class MqttConfig:
 class AasSensorConfig:
     sensor_url_sm_repository: str = "http://192.168.1.101:8081"
     # Submodel-ID deines Sensor-Submodels
-    sensor_submodel_id: str = "http://example.com/id/sm/..."  
+    sensor_submodel_id: str = "https://example.com/ids/sm/4339_7297_3282_2812"  
     # idShort des Elements im Sensor-Submodel, z.B. "temperature"
     sensor_submodelelement_id_short: str = "energyvalue"
 
@@ -43,14 +49,22 @@ class AggregationConfig:
 class AasConfig:
     base_url_sm_repository: str = "http://192.168.1.128:8081"
     # Submodel-IDs
-    emission_submodel_id: str = "http://example.com/id/sm/..."
+    carbon_footprint_submodel_id: str = "https://example.com/ids/sm/6218_8934_1526_1612"
+
+    emission_submodel_id: str = carbon_footprint_submodel_id
     emission_submodelelement_id_short: str = "emissionfactor"
 
-    scope3_proxy_submodel_id: str = "http://example.com/id/sm/..."
+    scope3_proxy_submodel_id: str = carbon_footprint_submodel_id
     scope3_proxy_submodelelement_id_short: str = "scope3proxy"
 
-    aggregation_submodel_id: str = "http://example.com/id/sm/..."
+    aggregation_submodel_id: str = carbon_footprint_submodel_id
     aggregation_submodelelement_id_short: str = "aggregationvalue"
+
+    aggregation_trigger_submodel_id: str = carbon_footprint_submodel_id
+    aggregation_trigger_submodelelement_id_short: str = "triggeraggregation"
+
+    aggregation_reset_submodel_id: str = carbon_footprint_submodel_id
+    aggregation_reset_submodelelement_id_short: str = "resetaggregation"
 
     # Verknüpfung zu anderen Konfigurationen
     sensor: AasSensorConfig = field(default_factory=AasSensorConfig)
