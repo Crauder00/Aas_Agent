@@ -6,9 +6,9 @@ from src.event_listener import EventListener
 from src.event_handler import EventHandler
 
 logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)-8s] %(name)s — %(message)s",
-    datefmt="%H:%M:%S",
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03d [%(levelname)-8s] %(name)s — %(message)s",
+    datefmt="%H:%M:%S"
 )
 # testet die EventHandler-Logik und einfachen AAS-Operationen mit realen Mqtt-Nachrichten
 
