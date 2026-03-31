@@ -34,6 +34,12 @@ class AasSensorConfig:
     sensor_submodelelement_id_short: str = "energyvalue"
 
 @dataclass
+class AggregationConfig:
+    aggregation_interval_seconds: int = 1 # z.B. alle 60 Sekunden aggregieren
+    aggregation_max_count: int = 300 # Max Anzahl Werte für Aggregation (z.B. 300 Werte = 5 Minuten (300s) bei 1s Intervall)
+    
+
+@dataclass
 class AasConfig:
     base_url_sm_repository: str = "http://192.168.1.128:8081"
     # Submodel-IDs
@@ -46,8 +52,10 @@ class AasConfig:
     aggregation_submodel_id: str = "http://example.com/id/sm/..."
     aggregation_submodelelement_id_short: str = "aggregationvalue"
 
-    #verknüpfte Config für Sensor-AAS
+    # Verknüpfung zu anderen Konfigurationen
     sensor: AasSensorConfig = field(default_factory=AasSensorConfig)
+    aggregation: AggregationConfig = field(default_factory=AggregationConfig)
+
 
 
 @dataclass
