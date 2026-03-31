@@ -86,7 +86,8 @@ class AasOperationService:
 
         # ── Aggregation init ──
         self._stop_aggregation.clear()
-        self._aggregation_value = 0.0 # Aggregation zurücksetzen
+        with self._aggregation_lock:
+            self._aggregation_value = 0.0 # Aggregation zurücksetzen
         logger.info("Aggregation gestartet")
 
         # ── Aggregations-Loop ──
@@ -96,34 +97,38 @@ class AasOperationService:
                     logger.info("Aggregation wird beendet (Stop-Flag erkannt)")
                     return
 
-                logger.info(f"Aggregationsschritt {i+1} ...") # testaufgabe um handlung der aggregation zu simulieren
-            #     # Emissionsfaktor threadsicher lesen
-            #     with self._emission_factor_lock:
-            #         factor = self._emission_factor
+                # Emissionsfaktor threadsicher lesen
+                with self._emission_factor_lock:
+                    factor = self._emission_factor
+                logger.debug(f"emissionsfaktor für Aggregationsschritt {i+1}: {factor}")
 
-            #     # Sensorwert lesen
-            #     sensorread = self._sensor_aas_client.read_sensor_value()
-            #     logger.debug(f"Sensorwert gelesen: {sensorread}")
+                # Sensorwert lesen
+                sensorread = self._sensor_aas_client.get_sensor_reading()
 
-            #     # Werte prüfen und Aggregation aktualisieren
-            #     if factor is None:
-            #         logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
-            #     if sensorread is None:
-            #         logger.warning(f"Schritt {i+1}: kein Sensorwert verfügbar")
-            #     else:
-            #         self._aggregation_value += factor * sensorread
-            #         logger.info(f"Schritt {i+1}: aktueller Aggregationswert: {self._aggregation_value}")
+
+                # Werte prüfen und Aggregation aktualisieren
+                if factor is None:
+                    logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
+                logger.debug(f"sensorread für Aggregationsschritt {i+1}: {sensorread}")
+                if sensorread is None:
+                    logger.warning(f"Schritt {i+1}: kein Sensorwert verfügbar")
+                else:
+                    logger.debug(f"Schritt {i+1}: Sensorread: {sensorread}") 
+                    with self._aggregation_lock:
+                        try:
+                            self._aggregation_value += float(factor) * float(sensorread) * (float(self._config.aggregation.aggregation_interval_seconds) / 3600.0) # Emissionen [kgCO2e] = emissionsfaktor[kgCO2e/kWh] * sensorread[kWh] * (deltaT[s] / 3600s/h) 
+                        except Exception as e:
+                            logger.error(f"Fehler bei der Aggregationsberechnung: {e}")
+                        logger.info(f"Schritt {i+1}: aktueller Aggregationswert: {self._aggregation_value}")
 
         # ── post Aggregation ──
         finally:
-            # Immer zurücksetzen — egal ob normal beendet oder abgebrochen
             with self._aggregation_lock:
-                self._update_aggregation_value()
-                logger.info(f"Aggregation abgeschlossen berechneter wert: {self._aggregation_value}")
-                self._aggregation_running = False
-                
-                # triggeraggregation zurücksetzen im AAS (z.B. damit sie wieder getriggert werden kann)
-                self._aas_client.set_value( 
+                logger.info(f"Aggregation beendet mit Aggregationswert: {self._aggregation_value}")
+                self._update_aggregation_value() # update Aggregationswert im AAS zurückschreiben
+                self._aggregation_running = False # Flag zurücksetzen dass jetzt keine Aggregation mehr läuft
+                #reset trigger im AAS zurücksetzen
+                self._aas_client.set_value(
                     self._config.aggregation_trigger_submodel_id,
                     self._config.aggregation_trigger_submodelelement_id_short,
                     "false"

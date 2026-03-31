@@ -35,13 +35,13 @@ class MqttConfig:
 class AasSensorConfig:
     sensor_url_sm_repository: str = "http://192.168.1.101:8081"
     # Submodel-ID deines Sensor-Submodels
-    sensor_submodel_id: str = "http://example.com/id/sm/..."  
+    sensor_submodel_id: str = "https://example.com/ids/sm/4339_7297_3282_2812"  
     # idShort des Elements im Sensor-Submodel, z.B. "temperature"
     sensor_submodelelement_id_short: str = "energyvalue"
 
 @dataclass
 class AggregationConfig:
-    aggregation_interval_seconds: int = 5 # z.B. alle 60 Sekunden aggregieren
+    aggregation_interval_seconds: int = 1 # z.B. alle 60 Sekunden aggregieren
     aggregation_max_count: int = 300 # Max Anzahl Werte für Aggregation (z.B. 300 Werte = 5 Minuten (300s) bei 1s Intervall)
     
 
