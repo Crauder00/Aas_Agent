@@ -1,6 +1,6 @@
 import logging
 from .config import AasSensorConfig
-from .aas_client import AASClient
+from .aas_sm_http_client import AasSmHttpClient
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class SensorAdapter:
     def __init__(self, config: AasSensorConfig):
         self._config = config
 
-        self._sensor_client = AASClient(self._config.sensor_url_sm_repository) # Client für Sensor-AAS
+        self._sensor_client = AasSmHttpClient(self._config.sensor_url_sm_repository) # Client für Sensor-AAS werte
 
     def get_sensor_reading(self, id_short: str) -> str | None:
         """
