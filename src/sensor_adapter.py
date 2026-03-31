@@ -1,6 +1,6 @@
 import logging
 from .config import AasSensorConfig
-from .aas_sm_http_client import AasSmHttpClient
+from .utils.aas_sm_http_client import AasSmHttpClient
 
 logger = logging.getLogger(__name__)
 

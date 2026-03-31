@@ -1,7 +1,7 @@
 import logging
 import threading
 from .config import AasConfig, AasSensorConfig
-from .aas_sm_http_client import AasSmHttpClient
+from .utils.aas_sm_http_client import AasSmHttpClient
 from .sensor_adapter import SensorAdapter
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ class AasOperationService:
         # ── Lokale Zustände / Variablen ───────────────────────────────────
         
         self._stop_aggregation = threading.Event() # Flag zum Stoppen einer laufenden Aggregation
+        self._aggregation_running = False # Hilfsvariable um zu wissen ob gerade eine Aggregation läuft
 
         self._emission_factor: float | None = None # Zuletzt gelesener Emissionsfaktor   
         self._scope3_proxy: float | None = None # Zuletzt gelesener Scope3-Proxy
@@ -28,6 +29,7 @@ class AasOperationService:
 
         # ── Locks ───────────────────────────────────────────────
         self._emission_factor_lock = threading.Lock() # nicht gleichzeitig auf _emission_factor zugreifen
+        self._aggregation_lock = threading.Lock() # nicht gleichzeitig auf _aggregation_running zugreifen
         self._scope3_proxy_lock = threading.Lock() # nicht gleichzeitig auf _scope3_proxy zugreifen
 
         # ── AAS Client ─────────────────────────────────────────────
@@ -75,43 +77,74 @@ class AasOperationService:
         Startet die Aggregation. Läuft bis stop_aggregation()
         aufgerufen wird oder der Lauf abgeschlossen ist.
         """
+        # Check: Verhindern dass mehrere Aggregationen gleichzeitig laufen
+        with self._aggregation_lock:
+            if self._aggregation_running:
+                logger.info("Aggregation läuft bereits — ignoriert")
+                return
+            self._aggregation_running = True # Flag setzen dass jetzt eine Aggregation läuft
+
         # ── Aggregation init ──
         self._stop_aggregation.clear()
         self._aggregation_value = 0.0 # Aggregation zurücksetzen
         logger.info("Aggregation gestartet")
 
         # ── Aggregations-Loop ──
-        for i in range(self._config.aggregation.aggregation_max_count):  # 12 × 5s = 60s max
-            if self._stop_aggregation.wait(timeout=self._config.aggregation.aggregation_interval_seconds):
-                logger.info("Aggregation abgebrochen")
-                return
+        try:
+            for i in range(self._config.aggregation.aggregation_max_count): 
+                if self._stop_aggregation.wait(timeout=self._config.aggregation.aggregation_interval_seconds):
+                    logger.info("Aggregation wird beendet (Stop-Flag erkannt)")
+                    return
 
-            # Emissionsfaktor threadsicher lesen
-            with self._emission_factor_lock:
-                factor = self._emission_factor
+                logger.info(f"Aggregationsschritt {i+1} ...") # testaufgabe um handlung der aggregation zu simulieren
+            #     # Emissionsfaktor threadsicher lesen
+            #     with self._emission_factor_lock:
+            #         factor = self._emission_factor
 
-            # Sensorwert lesen
-            sensorread = self._sensor_aas_client.read_sensor_value()
-            logger.debug(f"Sensorwert gelesen: {sensorread}")
+            #     # Sensorwert lesen
+            #     sensorread = self._sensor_aas_client.read_sensor_value()
+            #     logger.debug(f"Sensorwert gelesen: {sensorread}")
 
-            # Werte prüfen und Aggregation aktualisieren
-            if factor is None:
-                logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
-            if sensorread is None:
-                logger.warning(f"Schritt {i+1}: kein Sensorwert verfügbar")
-            else:
-                self._aggregation_value += factor * sensorread
-                logger.info(f"Schritt {i+1}: aktueller Aggregationswert: {self._aggregation_value}")
+            #     # Werte prüfen und Aggregation aktualisieren
+            #     if factor is None:
+            #         logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
+            #     if sensorread is None:
+            #         logger.warning(f"Schritt {i+1}: kein Sensorwert verfügbar")
+            #     else:
+            #         self._aggregation_value += factor * sensorread
+            #         logger.info(f"Schritt {i+1}: aktueller Aggregationswert: {self._aggregation_value}")
 
         # ── post Aggregation ──
-        self._update_aggregation_value()
-        logger.info(f"Aggregation abgeschlossen berechneter wert: {self._aggregation_value}")
+        finally:
+            # Immer zurücksetzen — egal ob normal beendet oder abgebrochen
+            with self._aggregation_lock:
+                self._update_aggregation_value()
+                logger.info(f"Aggregation abgeschlossen berechneter wert: {self._aggregation_value}")
+                self._aggregation_running = False
+                
+                # triggeraggregation zurücksetzen im AAS (z.B. damit sie wieder getriggert werden kann)
+                self._aas_client.set_value( 
+                    self._config.aggregation_trigger_submodel_id,
+                    self._config.aggregation_trigger_submodelelement_id_short,
+                    "false"
+                )
 
     def reset_aggregation(self) -> None:
         """Bricht eine laufende Aggregation ab."""
-        logger.info("reset_aggregation")
-        # self._stop_aggregation.set()
-        # logger.info("Aggregation gestoppt")
+        try:
+            with self._aggregation_lock:
+                if not self._aggregation_running:
+                    logger.info("Keine laufende Aggregation — ignoriert")
+                    return
+                self._stop_aggregation.set()
+                logger.info("Aggregation stopp Flag gesetzt")
+        finally:
+            # resetaggregation zurücksetzen im AAS (z.B. damit sie wieder getriggert werden kann)
+            self._aas_client.set_value(
+                self._config.aggregation_reset_submodel_id,
+                self._config.aggregation_reset_submodelelement_id_short,
+                "false"
+            )
 
     def set_scope3_proxy(self) -> None:
         """

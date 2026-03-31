@@ -19,9 +19,11 @@ class MqttConfig:
     port: int = 1883
     # Topic-Pattern vom BaSyx Server
     topic_filter: str = "sm-repository/+/submodels/+/submodelElements/+/updated"
-    topic_filters: Optional[List[str]] = None
+    # topic_filters: Optional[List[str]] = None
     client_id: str = "aas-agent"
 
+    # TODO: mehrere topic_filter unterstützen, z.B. für spezifische Submodelle oder Elemente
+    # TODO: submodel id filter anstelle von "+"
     # def __post_init__(self):
     #     if self.topic_filters is None:
     #         self.topic_filters = [
@@ -39,7 +41,7 @@ class AasSensorConfig:
 
 @dataclass
 class AggregationConfig:
-    aggregation_interval_seconds: int = 1 # z.B. alle 60 Sekunden aggregieren
+    aggregation_interval_seconds: int = 5 # z.B. alle 60 Sekunden aggregieren
     aggregation_max_count: int = 300 # Max Anzahl Werte für Aggregation (z.B. 300 Werte = 5 Minuten (300s) bei 1s Intervall)
     
 
@@ -47,14 +49,22 @@ class AggregationConfig:
 class AasConfig:
     base_url_sm_repository: str = "http://192.168.1.128:8081"
     # Submodel-IDs
-    emission_submodel_id: str = "http://example.com/id/sm/..."
+    carbon_footprint_submodel_id: str = "https://example.com/ids/sm/6218_8934_1526_1612"
+
+    emission_submodel_id: str = carbon_footprint_submodel_id
     emission_submodelelement_id_short: str = "emissionfactor"
 
-    scope3_proxy_submodel_id: str = "http://example.com/id/sm/..."
+    scope3_proxy_submodel_id: str = carbon_footprint_submodel_id
     scope3_proxy_submodelelement_id_short: str = "scope3proxy"
 
-    aggregation_submodel_id: str = "http://example.com/id/sm/..."
+    aggregation_submodel_id: str = carbon_footprint_submodel_id
     aggregation_submodelelement_id_short: str = "aggregationvalue"
+
+    aggregation_trigger_submodel_id: str = carbon_footprint_submodel_id
+    aggregation_trigger_submodelelement_id_short: str = "triggeraggregation"
+
+    aggregation_reset_submodel_id: str = carbon_footprint_submodel_id
+    aggregation_reset_submodelelement_id_short: str = "resetaggregation"
 
     # Verknüpfung zu anderen Konfigurationen
     sensor: AasSensorConfig = field(default_factory=AasSensorConfig)
