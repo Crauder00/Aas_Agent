@@ -1,12 +1,16 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-# Mapping von idShort (Kleinbuchstaben) zu Methodenname in AasOperationService
+@dataclass
+class TopicConfig:
+    method: str
+    execute_when: str = "everytime"  # everytime | onlyontrue | onlyonfalse | never
+
 TOPIC_OPERATION_MAP = {
-    "emissionfactor":     "set_emission_factor",
-    "scope3proxy":        "set_scope3_proxy",
-    "resetaggregation":   "reset_aggregation",
-    "triggeraggregation": "trigger_aggregation",
+    "emissionfactor":     TopicConfig("set_emission_factor",  "everytime"),
+    "scope3proxy":        TopicConfig("set_scope3_proxy",     "everytime"),
+    "resetaggregation":   TopicConfig("reset_aggregation",    "onlyontrue"),
+    "triggeraggregation": TopicConfig("trigger_aggregation",  "onlyontrue"),
 }
 
 @dataclass
