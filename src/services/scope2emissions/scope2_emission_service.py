@@ -1,8 +1,8 @@
 import logging
 import threading
-from .base_operation_service import BaseOperationService, operation, GuardResult
-from .config import AasConfig
-from .utils.aas_sm_http_client import AasSmHttpClient
+from src.core.base_operation_service import BaseOperationService, operation, GuardResult
+from .scope2_emission_config import Scope2Config
+from src.core.utils.aas_sm_http_client import AasSmHttpClient
 from .sensor_adapter import SensorAdapter
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class Scope2EmissionService(BaseOperationService):
     Registriert seine Operationen automatisch via @operation Dekorator.
     """
 
-    def __init__(self, config: AasConfig):
+    def __init__(self, config: Scope2Config):
         self._config = config
 
         # ── Lokale Zustände ───────────────────────────────────────────────
@@ -31,7 +31,9 @@ class Scope2EmissionService(BaseOperationService):
         self._aggregation_lock = threading.Lock()
 
         # ── Clients ───────────────────────────────────────────────────────
-        self._aas_client = AasSmHttpClient(self._config.base_url)
+        # base_url wird aus emission_factor genommen — alle lokalen SubmodelElemente
+        # zeigen auf denselben AAS-Server
+        self._aas_client = AasSmHttpClient(self._config.emission_factor.base_url)
         self._sensor_adapter = SensorAdapter(self._config.sensor)
 
         # ── Init: BaseOperationService aufrufen (baut Registry auf) ───────
@@ -156,7 +158,6 @@ class Scope2EmissionService(BaseOperationService):
             running = self._aggregation_running
 
         if not running:
-            # Keine Aggregation aktiv → AAS-Eintrag zurücksetzen und abbrechen
             logger.info("Reset ignoriert — keine Aggregation aktiv")
             self._aas_client.set_value(
                 self._config.aggregation_reset.submodel_id,
