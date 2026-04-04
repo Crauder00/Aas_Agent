@@ -1,88 +1,60 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+
+
+# --- Basis-Klassen ---
 
 @dataclass
-class TopicConfig:
-    method: str
-    execute_when: str = "everytime"  # everytime | onlyontrue | onlyonfalse | never
+class SubmodelElementConfig:
+    """Referenz auf ein SubmodelElement innerhalb eines Submodels."""
+    submodel_id: str
+    id_short: str
 
-TOPIC_OPERATION_MAP = {
-    "emissionfactor":     TopicConfig("set_emission_factor",  "everytime"),
-    "scope3proxy":        TopicConfig("set_scope3_proxy",     "everytime"),
-    "resetaggregation":   TopicConfig("reset_aggregation",    "onlyontrue"),
-    "triggeraggregation": TopicConfig("trigger_aggregation",  "onlyontrue"),
-}
+
+@dataclass
+class SensorConfig:
+    """Verbindungsdaten zu einem Sensor-Repository."""
+    base_url: str
+    submodel_id: str
+    id_short: str
+
+
+# --- MQTT ---
 
 @dataclass
 class MqttConfig:
-    host: str = "192.168.1.128"
-    port: int = 1883
-    # Topic-Pattern vom BaSyx Server
-    topic_filter: str = "sm-repository/+/submodels/+/submodelElements/+/updated"
-    # topic_filters: Optional[List[str]] = None
+    host: str                                                                       # Pflichtfeld
+    port: int = 1883                                                                # Standard MQTT-Port
+    topic_filter: str = "sm-repository/+/submodels/+/submodelElements/+/updated"  # Standard-Filter
     client_id: str = "aas-agent"
 
-    # TODO: mehrere topic_filter unterstützen, z.B. für spezifische Submodelle oder Elemente
-    # TODO: submodel id filter anstelle von "+"
-    # def __post_init__(self):
-    #     if self.topic_filters is None:
-    #         self.topic_filters = [
-    #             "sm-repository/sm-repo/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vNTY1MF85MTM0XzQ5MzhfNDM0MA/submodelElements/Operations[0]/updated",
-    #             "sm-repository/sm-repo/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vNTY1MF85MTM0XzQ5MzhfNDM0MA/submodelElements/Operations[1]/updated",
-    #         ]
 
-@dataclass
-class AasSensorConfig:
-    sensor_url_sm_repository: str = "http://192.168.1.101:8081"
-    # Submodel-ID deines Sensor-Submodels
-    sensor_submodel_id: str = "https://example.com/ids/sm/4339_7297_3282_2812"  
-    # idShort des Elements im Sensor-Submodel, z.B. "temperature"
-    sensor_submodelelement_id_short: str = "energyvalue"
+# --- AAS ---
 
 @dataclass
 class AggregationConfig:
-    aggregation_interval_seconds: int = 1 # z.B. alle 60 Sekunden aggregieren
-    aggregation_max_count: int = 300 # Max Anzahl Werte für Aggregation (z.B. 300 Werte = 5 Minuten (300s) bei 1s Intervall)
-    
+    aggregation_interval_seconds: int = 1    # Intervall zwischen Aggregationsschritten
+    aggregation_max_count: int = 300         # Max Anzahl Schritte pro Lauf
+
 
 @dataclass
 class AasConfig:
-    base_url_sm_repository: str = "http://192.168.1.128:8081"
-    # Submodel-IDs
-    carbon_footprint_submodel_id: str = "https://example.com/ids/sm/6218_8934_1526_1612"
-
-    emission_submodel_id: str = carbon_footprint_submodel_id
-    emission_submodelelement_id_short: str = "emissionfactor"
-
-    scope3_proxy_submodel_id: str = carbon_footprint_submodel_id
-    scope3_proxy_submodelelement_id_short: str = "scope3proxy"
-
-    aggregation_submodel_id: str = carbon_footprint_submodel_id
-    aggregation_submodelelement_id_short: str = "aggregationvalue"
-
-    aggregation_trigger_submodel_id: str = carbon_footprint_submodel_id
-    aggregation_trigger_submodelelement_id_short: str = "triggeraggregation"
-
-    aggregation_reset_submodel_id: str = carbon_footprint_submodel_id
-    aggregation_reset_submodelelement_id_short: str = "resetaggregation"
-
-    # Verknüpfung zu anderen Konfigurationen
-    sensor: AasSensorConfig = field(default_factory=AasSensorConfig)
+    """
+    Verbindungsdaten zum AAS Repository und Referenzen auf alle
+    SubmodelElemente die der Service lesen/schreiben muss.
+    """
+    base_url: str                               # Pflichtfeld
+    emission_factor: SubmodelElementConfig      # Pflichtfeld
+    scope3_proxy: SubmodelElementConfig         # Pflichtfeld
+    aggregation_value: SubmodelElementConfig    # Pflichtfeld
+    aggregation_trigger: SubmodelElementConfig  # Pflichtfeld
+    aggregation_reset: SubmodelElementConfig    # Pflichtfeld
+    sensor: SensorConfig                        # Pflichtfeld
     aggregation: AggregationConfig = field(default_factory=AggregationConfig)
 
 
+# --- Top-Level ---
 
 @dataclass
 class AgentConfig:
-    mqtt: MqttConfig = None
-    aas: AasConfig = None
-    aas_sensor: AasSensorConfig = None
-
-    def __post_init__(self):
-        # Defaults setzen falls nichts übergeben wurde
-        if self.mqtt is None:
-            self.mqtt = MqttConfig()
-        if self.aas is None:
-            self.aas = AasConfig()
-        if self.aas_sensor is None:
-            self.aas_sensor = AasSensorConfig()
+    mqtt: MqttConfig    # Pflichtfeld
+    aas: AasConfig      # Pflichtfeld

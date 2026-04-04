@@ -7,6 +7,7 @@ name = "aas-agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aas-python-http-client" },
     { name = "basyx-python-sdk" },
     { name = "paho-mqtt" },
     { name = "requests" },
@@ -14,9 +15,26 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aas-python-http-client", specifier = ">=1.0.2" },
     { name = "basyx-python-sdk", specifier = ">=2.0.0" },
     { name = "paho-mqtt", specifier = ">=2.1.0" },
     { name = "requests", specifier = ">=2.33.0" },
+]
+
+[[package]]
+name = "aas-python-http-client"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "basyx-python-sdk" },
+    { name = "certifi" },
+    { name = "python-dateutil" },
+    { name = "six" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4c/a5/d0c4bad7ce5fa5d9d1f9cc9760db915699716b67644f4eb52d7369ef9a8f/aas-python-http-client-1.0.2.tar.gz", hash = "sha256:914b9ff73429f8641e4bc33247b03cf4ffa836bf5f1f4fcf8efbccd93cdb21a8", size = 116544, upload-time = "2025-03-24T11:34:20.674Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/46/07f4152a99b24be88464b8d8683d657866eb6c24c7ac5e5523a89ce1f7dc/aas_python_http_client-1.0.2-py3-none-any.whl", hash = "sha256:4d1b3b8a36e1d939c0b72a521e15d410e5ac41183a7b46ccaf29032f104293cc", size = 298020, upload-time = "2025-03-24T11:34:19.022Z" },
 ]
 
 [[package]]
