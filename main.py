@@ -1,15 +1,9 @@
 import logging
-from src.config import (
-    AgentConfig,
-    MqttConfig,
-    AasConfig,
-    AggregationConfig,
-    SubmodelElementConfig,
-    SensorConfig,
-)
-from src.scope2_emission_service import Scope2EmissionService
-from src.event_listener import EventListener
-from src.event_handler import EventHandler
+from src.config import AgentConfig, MqttConfig, SubmodelElementConfig
+from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig
+from src.services.emission_service.emission_service import EmissionService
+from src.core.event_listener import EventListener
+from src.core.event_handler import EventHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,10 +12,17 @@ logging.basicConfig(
 )
 
 # =============================================================================
-# Konfiguration
+# Konstanten
 # =============================================================================
 
+LOCAL_AAS = "http://192.168.1.128:8081"
+SENSOR_AAS = "http://192.168.1.101:8081"
 CF_SUBMODEL_ID = "https://example.com/ids/sm/6218_8934_1526_1612"
+SENSOR_SUBMODEL_ID = "https://acplt.org/Simple_Submodel"
+
+# =============================================================================
+# Konfiguration
+# =============================================================================
 
 config = AgentConfig(
     mqtt=MqttConfig(
@@ -29,45 +30,22 @@ config = AgentConfig(
         port=1883,
         client_id="aas-agent",
     ),
-    aas=AasConfig(
-        base_url="http://192.168.1.128:8081",
-        emission_factor=SubmodelElementConfig(
-            submodel_id=CF_SUBMODEL_ID,
-            id_short="emissionfactor",
-        ),
-        scope3_proxy=SubmodelElementConfig(
-            submodel_id=CF_SUBMODEL_ID,
-            id_short="scope3proxy",
-        ),
-        aggregation_value=SubmodelElementConfig(
-            submodel_id=CF_SUBMODEL_ID,
-            id_short="aggregationvalue",
-        ),
-        aggregation_trigger=SubmodelElementConfig(
-            submodel_id=CF_SUBMODEL_ID,
-            id_short="triggeraggregation",
-        ),
-        aggregation_reset=SubmodelElementConfig(
-            submodel_id=CF_SUBMODEL_ID,
-            id_short="resetaggregation",
-        ),
-        sensor=SensorConfig(
-            base_url="http://192.168.1.101:8081",
-            submodel_id="https://acplt.org/Simple_Submodel",
-            id_short="ExampleProperty",
-        ),
-        aggregation=AggregationConfig(
-            aggregation_interval_seconds=1,
-            aggregation_max_count=300,
-        ),
-    ),
+)
+
+scope2_config = EmissionServiceConfig(
+    emission_factor=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "emissionfactor"),
+    scope3_proxy=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope3proxy"),
+    aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
+    aggregation_trigger=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "triggeraggregation"),
+    aggregation_reset=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "resetaggregation"),
+    sensor=SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "ExampleProperty"),
 )
 
 # =============================================================================
 # Start
 # =============================================================================
 
-service = Scope2EmissionService(config.aas)
+service = EmissionService(scope2_config)
 handler = EventHandler(service)
 listener = EventListener(config.mqtt, on_message=handler.handle)
 listener.start()

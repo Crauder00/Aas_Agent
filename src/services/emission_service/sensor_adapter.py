@@ -1,6 +1,6 @@
 import logging
-from .config import SensorConfig
-from .utils.aas_sm_http_client import AasSmHttpClient
+from src.config import SubmodelElementConfig
+from src.core.utils.aas_sm_http_client import AasSmHttpClient
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +11,9 @@ class SensorAdapter:
     Verwendet AasSmHttpClient — keine direkte SDK-Logik hier.
     """
 
-    def __init__(self, config: SensorConfig):
+    def __init__(self, config: SubmodelElementConfig):
         self._config = config
-        self._client = AasSmHttpClient(self._config.base_url)
+        self._client = AasSmHttpClient(config.base_url)
 
     def get_sensor_reading(self) -> str | None:
         """
