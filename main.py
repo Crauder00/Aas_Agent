@@ -1,7 +1,7 @@
 import logging
 from src.config import AgentConfig, MqttConfig, SubmodelElementConfig
-from src.services.scope2emissions.scope2_emission_config import Scope2Config, AggregationConfig
-from src.services.scope2emissions.scope2_emission_service import Scope2EmissionService
+from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig
+from src.services.emission_service.emission_service import EmissionService
 from src.core.event_listener import EventListener
 from src.core.event_handler import EventHandler
 
@@ -32,7 +32,7 @@ config = AgentConfig(
     ),
 )
 
-scope2_config = Scope2Config(
+scope2_config = EmissionServiceConfig(
     emission_factor=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "emissionfactor"),
     scope3_proxy=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope3proxy"),
     aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
@@ -45,7 +45,7 @@ scope2_config = Scope2Config(
 # Start
 # =============================================================================
 
-service = Scope2EmissionService(scope2_config)
+service = EmissionService(scope2_config)
 handler = EventHandler(service)
 listener = EventListener(config.mqtt, on_message=handler.handle)
 listener.start()

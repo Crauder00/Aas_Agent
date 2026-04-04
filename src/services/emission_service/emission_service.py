@@ -1,20 +1,20 @@
 import logging
 import threading
 from src.core.base_operation_service import BaseOperationService, operation, GuardResult
-from .scope2_emission_config import Scope2Config
+from .emission_service_config import EmissionServiceConfig
 from src.core.utils.aas_sm_http_client import AasSmHttpClient
 from .sensor_adapter import SensorAdapter
 
 logger = logging.getLogger(__name__)
 
 
-class Scope2EmissionService(BaseOperationService):
+class EmissionService(BaseOperationService):
     """
     UseCase: Aggregation von Scope-2 Emissionswerten.
     Registriert seine Operationen automatisch via @operation Dekorator.
     """
 
-    def __init__(self, config: Scope2Config):
+    def __init__(self, config: EmissionServiceConfig):
         self._config = config
 
         # ── Lokale Zustände ───────────────────────────────────────────────

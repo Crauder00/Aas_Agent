@@ -11,8 +11,8 @@ class AggregationConfig:
 
 
 @dataclass
-class Scope2Config:
-    """Alles was Scope2EmissionService braucht."""
+class EmissionServiceConfig:
+    """Alles was EmissionService braucht."""
     emission_factor: SubmodelElementConfig      # Pflichtfeld
     scope3_proxy: SubmodelElementConfig         # Pflichtfeld
     aggregation_value: SubmodelElementConfig    # Pflichtfeld
