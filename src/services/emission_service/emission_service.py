@@ -15,26 +15,26 @@ class EmissionService(BaseOperationService):
     """
 
     def __init__(self, config: EmissionServiceConfig):
-        self._config = config
+        self._config: EmissionServiceConfig = config
 
         # ── Lokale Zustände ───────────────────────────────────────────────
         self._emission_factor: float | None = None
         self._scope3_proxy: float | None = None
         self._aggregation_value: float | None = None
         self._total_emission: float | None = None
-        self._aggregation_running = False
-        self._stop_aggregation = threading.Event()
+        self._aggregation_running: bool = False
+        self._stop_aggregation: threading.Event = threading.Event()
 
         # ── Locks ─────────────────────────────────────────────────────────
-        self._emission_factor_lock = threading.Lock()
-        self._scope3_proxy_lock = threading.Lock()
-        self._aggregation_lock = threading.Lock()
+        self._emission_factor_lock: threading.Lock = threading.Lock()
+        self._scope3_proxy_lock: threading.Lock = threading.Lock()
+        self._aggregation_lock: threading.Lock = threading.Lock()
 
         # ── Clients ───────────────────────────────────────────────────────
         # base_url wird aus emission_factor genommen — alle lokalen SubmodelElemente
         # zeigen auf denselben AAS-Server
-        self._aas_client = AasSmHttpClient(self._config.emission_factor.base_url)
-        self._sensor_adapter = SensorAdapter(self._config.sensor)
+        self._aas_client: AasSmHttpClient = AasSmHttpClient(self._config.emission_factor.base_url)
+        self._sensor_adapter: SensorAdapter = SensorAdapter(self._config.sensor)
 
         # ── Init: BaseOperationService aufrufen (baut Registry auf) ───────
         super().__init__()

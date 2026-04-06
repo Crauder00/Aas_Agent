@@ -13,6 +13,11 @@ dependencies = [
     { name = "requests" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "py2puml" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "aas-python-http-client", specifier = ">=1.0.2" },
@@ -20,6 +25,9 @@ requires-dist = [
     { name = "paho-mqtt", specifier = ">=2.1.0" },
     { name = "requests", specifier = ">=2.33.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "py2puml", specifier = ">=0.11.0" }]
 
 [[package]]
 name = "aas-python-http-client"
@@ -161,6 +169,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/39/15/0a6214e76d4d32e7f663b109cf71fb22561c2be0f701d67f93950cd40542/paho_mqtt-2.1.0.tar.gz", hash = "sha256:12d6e7511d4137555a3f6ea167ae846af2c7357b10bc6fa4f7c3968fc1723834", size = 148848, upload-time = "2024-04-29T19:52:55.591Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c4/cb/00451c3cf31790287768bb12c6bec834f5d292eaf3022afc88e14b8afc94/paho_mqtt-2.1.0-py3-none-any.whl", hash = "sha256:6db9ba9b34ed5bc6b6e3812718c7e06e2fd7444540df2455d2c51bd58808feee", size = 67219, upload-time = "2024-04-29T19:52:48.345Z" },
+]
+
+[[package]]
+name = "py2puml"
+version = "0.11.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/65/51eb076157c34ca7686726c45a92da1bc2cb72e8d95c292f4cb86f0982ab/py2puml-0.11.0.tar.gz", hash = "sha256:a08ce1988e163ebcb9e0f2fbc6e6b1251e0abd1f9cf1f2e32a32744cb85a99ea", size = 19974, upload-time = "2026-02-18T13:20:57.835Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/87/15d07aabfbd2ff1e6836aa7871c675a1b709d85a1cb46342622efefebdf0/py2puml-0.11.0-py3-none-any.whl", hash = "sha256:a64689d149db7d6d3253a719be4050a2b4e2802758481bd0ca1da2400f8d9f49", size = 27092, upload-time = "2026-02-18T13:20:56.316Z" },
 ]
 
 [[package]]

@@ -1,30 +1,30 @@
 import logging
+from typing import Final
+
+from src.aas_agent import AasAgent
 from src.config import AgentConfig, MqttConfig, SubmodelElementConfig
-from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig
-from src.services.emission_service.emission_service import EmissionService
-from src.core.event_listener import EventListener
-from src.core.event_handler import EventHandler
+from src.services.emission_service.emission_service_config import EmissionServiceConfig
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s.%(msecs)03d [%(levelname)-8s] %(name)s — %(message)s",
-    datefmt="%H:%M:%S"
+    datefmt="%H:%M:%S",
 )
 
 # =============================================================================
 # Konstanten
 # =============================================================================
 
-LOCAL_AAS = "http://192.168.1.128:8081"
-SENSOR_AAS = "http://192.168.1.101:8081"
-CF_SUBMODEL_ID = "https://example.com/ids/sm/6218_8934_1526_1612"
-SENSOR_SUBMODEL_ID = "https://acplt.org/Simple_Submodel"
+LOCAL_AAS: Final[str] = "http://192.168.1.128:8081"
+SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
+CF_SUBMODEL_ID: Final[str] = "https://example.com/ids/sm/6218_8934_1526_1612"
+SENSOR_SUBMODEL_ID: Final[str] = "https://acplt.org/Simple_Submodel"
 
 # =============================================================================
 # Konfiguration
 # =============================================================================
 
-config = AgentConfig(
+agent_config: AgentConfig = AgentConfig(
     mqtt=MqttConfig(
         host="192.168.1.128",
         port=1883,
@@ -32,7 +32,7 @@ config = AgentConfig(
     ),
 )
 
-scope2_config = EmissionServiceConfig(
+emission_config: EmissionServiceConfig = EmissionServiceConfig(
     emission_factor=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "emissionfactor"),
     scope3_proxy=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope3proxy"),
     aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
@@ -45,11 +45,15 @@ scope2_config = EmissionServiceConfig(
 # Start
 # =============================================================================
 
-service = EmissionService(scope2_config)
-handler = EventHandler(service)
-listener = EventListener(config.mqtt, on_message=handler.handle)
-listener.start()
+def main() -> None:
+    agent = AasAgent(agent_config, emission_config)
+    agent.start()
 
-print("Warte auf MQTT-Nachrichten...")
-input("Drücke Enter zum Beenden...\n")
-listener.stop()
+    print("Warte auf MQTT-Nachrichten...")
+    input("Drücke Enter zum Beenden...\n")
+
+    agent.stop()
+
+
+if __name__ == "__main__":
+    main()

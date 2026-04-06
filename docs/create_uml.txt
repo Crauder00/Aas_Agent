@@ -1,0 +1,1 @@
+uv run py2puml src src > docs/images/diagram.puml
