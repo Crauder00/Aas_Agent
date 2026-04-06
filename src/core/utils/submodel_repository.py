@@ -1,4 +1,4 @@
-# src/core/utils/aas_sm_http_client.py
+# src/core/utils/submodel_repository.py
 
 import logging
 from typing import Any
@@ -10,20 +10,21 @@ import json
 logger = logging.getLogger(__name__)
 
 
-class SubmodelRepositoryClient:
+class SubmodelRepository:
     """
     Adapter: Kapselt die aas-python-http-client Library hinter einer
     einfachen get_value / set_value Schnittstelle.
     """
 
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, submodel_repo_id: str | None = None):
         configuration = Configuration()
         configuration.host = base_url.rstrip("/")
 
         api_client = ApiClient(configuration=configuration)
         self._submodel_client = SubmodelRepositoryAPIApi(api_client=api_client)
+        self._submodel_repo_id = submodel_repo_id
 
-    def get_value(self, submodel_id: str, id_short: str) -> str | None:
+    def get_value(self, id_short: str) -> str | None:
         """
         Liest einen einzelnen Property-Wert vom AAS Server.
 
@@ -36,7 +37,7 @@ class SubmodelRepositoryClient:
         """
         try:
             submodel = self._submodel_client.get_submodel_by_id(
-                string_to_base64url(submodel_id)
+                string_to_base64url(self._submodel_repo_id)
             )
             prop = submodel.submodel_element.get("id_short", id_short)
             value = prop.value
@@ -47,7 +48,7 @@ class SubmodelRepositoryClient:
             logger.error(f"Fehler beim Lesen von '{id_short}': {e}")
             return None
 
-    def set_value(self, submodel_id: str, id_short: str, value: Any) -> bool:
+    def set_value(self, id_short: str, value: Any) -> bool:
         """
         Aktualisiert einen einzelnen Property-Wert auf dem AAS Server.
 
@@ -61,8 +62,8 @@ class SubmodelRepositoryClient:
         """
         try:
             self._submodel_client.patch_submodel_element_by_path_value_only_submodel_repo(
-                json.dumps(value),
-                string_to_base64url(submodel_id),
+                json.dumps(str(value)),
+                string_to_base64url(self._submodel_repo_id),
                 id_short,
             )
             logger.debug(f"Wert '{id_short}' erfolgreich auf '{value}' gesetzt")
