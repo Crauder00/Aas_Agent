@@ -17,8 +17,8 @@ logging.basicConfig(
 
 LOCAL_AAS: Final[str] = "http://192.168.1.128:8081"
 SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
-CF_SUBMODEL_ID: Final[str] = "https://example.com/ids/sm/6218_8934_1526_1612"
-SENSOR_SUBMODEL_ID: Final[str] = "https://acplt.org/Simple_Submodel"
+CF_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
+SENSOR_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
 
 # =============================================================================
 # Konfiguration
@@ -38,7 +38,7 @@ emission_config: EmissionServiceConfig = EmissionServiceConfig(
     aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
     aggregation_trigger=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "triggeraggregation"),
     aggregation_reset=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "resetaggregation"),
-    sensor=SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "ExampleProperty"),
+    sensor=SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "totalemissions"),
 )
 
 # =============================================================================

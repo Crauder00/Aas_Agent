@@ -2,8 +2,9 @@ import logging
 import threading
 from src.core.base_operation_service import BaseOperationService, operation, GuardResult
 from .emission_service_config import EmissionServiceConfig
-from src.core.utils.aas_sm_http_client import AasSmHttpClient
-from .sensor_adapter import SensorAdapter
+# from src.core.utils.aas_sm_http_client import AasSmHttpClient
+from src.core.utils.submodel_repository import SubmodelRepository
+# from .sensor_adapter import SensorAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,10 @@ class EmissionService(BaseOperationService):
         # ── Clients ───────────────────────────────────────────────────────
         # base_url wird aus emission_factor genommen — alle lokalen SubmodelElemente
         # zeigen auf denselben AAS-Server
-        self._aas_client: AasSmHttpClient = AasSmHttpClient(self._config.emission_factor.base_url)
-        self._sensor_adapter: SensorAdapter = SensorAdapter(self._config.sensor)
+        # self._aas_client: AasSmHttpClient = AasSmHttpClient(self._config.emission_factor.base_url)
+        # self._sensor_adapter: SensorAdapter = SensorAdapter(self._config.sensor)
+        self._aas_client: SubmodelRepository = SubmodelRepository(self._config.emission_factor.base_url, self._config.emission_factor.submodel_id)
+        self._sensor_adapter: SubmodelRepository = SubmodelRepository(self._config.sensor.base_url, self._config.sensor.submodel_id)
 
         # ── Init: BaseOperationService aufrufen (baut Registry auf) ───────
         super().__init__()
@@ -50,8 +53,8 @@ class EmissionService(BaseOperationService):
         logger.info(f"Emissionsfaktor vor Aktualisierung: {self._emission_factor}")
 
         raw = self._aas_client.get_value(
-            self._config.emission_factor.submodel_id,
-            self._config.emission_factor.id_short,
+            # self._config.emission_factor.submodel_id,
+            self._config.emission_factor.id_short
         )
 
         if raw is None:
@@ -73,8 +76,8 @@ class EmissionService(BaseOperationService):
     def set_scope3_proxy(self, payload: str) -> None:
         """Liest den aktuellen Scope3-Proxy vom AAS und speichert ihn lokal."""
         raw = self._aas_client.get_value(
-            self._config.scope3_proxy.submodel_id,
-            self._config.scope3_proxy.id_short,
+            # self._config.scope3_proxy.submodel_id,
+            self._config.scope3_proxy.id_short
         )
 
         if raw is None:
@@ -116,7 +119,12 @@ class EmissionService(BaseOperationService):
                 with self._emission_factor_lock:
                     factor = self._emission_factor
 
-                sensorread = self._sensor_adapter.get_sensor_reading()
+                # sensorread = self._sensor_adapter.get_sensor_reading()
+                sensorread = self._sensor_adapter.get_value(
+                    # self._config.sensor.submodel_id, 
+                    self._config.sensor.id_short
+                )
+
 
                 if factor is None:
                     logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
@@ -139,7 +147,7 @@ class EmissionService(BaseOperationService):
                 self._update_aggregation_value()
                 self._aggregation_running = False
                 self._aas_client.set_value(
-                    self._config.aggregation_trigger.submodel_id,
+                    # self._config.aggregation_trigger.submodel_id,
                     self._config.aggregation_trigger.id_short,
                     "false",
                 )
@@ -160,7 +168,7 @@ class EmissionService(BaseOperationService):
         if not running:
             logger.info("Reset ignoriert — keine Aggregation aktiv")
             self._aas_client.set_value(
-                self._config.aggregation_reset.submodel_id,
+                # self._config.aggregation_reset.submodel_id,
                 self._config.aggregation_reset.id_short,
                 "false",
             )

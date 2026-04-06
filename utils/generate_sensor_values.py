@@ -8,13 +8,13 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-from src.utils.aas_sm_http_client import AasSmHttpClient
+from src.core.utils.aas_sm_http_client import AasSmHttpClient
 import time
 
 # ── Konfiguration ──────────────────────────────────────────────────────────────
 BASE_URL    = "http://192.168.1.101:8081"   # <-- anpassen
-SUBMODEL_ID = "https://example.com/ids/sm/4339_7297_3282_2812"      # <-- anpassen
-ID_SHORT    = "energyvalue"            # <-- anpassen
+SUBMODEL_ID = "http://example.com/submodel/carbonfootprint"      # <-- anpassen
+ID_SHORT    = "totalemissions"            # <-- anpassen
 # ──────────────────────────────────────────────────────────────────────────────
 
 client = AasSmHttpClient(BASE_URL)
