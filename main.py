@@ -5,7 +5,7 @@ from typing import Final
 
 from src.aas_agent import AasAgent
 from src.config import AgentConfig, MqttConfig, SubmodelElementConfig
-from src.services.emission_service.emission_service_config import EmissionServiceConfig
+from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig
 
 logging.basicConfig(
     level=logging.INFO,
@@ -43,6 +43,7 @@ emission_config: EmissionServiceConfig = EmissionServiceConfig(
     aggregation_trigger=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "triggeraggregation"),
     aggregation_reset=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "resetaggregation"),
     sensor=SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "totalemissions"),
+    aggregation=AggregationConfig(0.1, 3000)
 )
 
 # =============================================================================

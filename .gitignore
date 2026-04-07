@@ -1,5 +1,7 @@
 # Lokale Varianten / Backups
 local_backups/
+benchmark/results/
+dev/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
