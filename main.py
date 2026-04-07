@@ -38,6 +38,7 @@ emission_config: EmissionServiceConfig = EmissionServiceConfig(
     emission_factor=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "emissionfactor"),
     scope2_list=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope2emissionslist"),
     scope3_proxy=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope3proxy"),
+    total_emission=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "totalemissions"),
     aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
     aggregation_trigger=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "triggeraggregation"),
     aggregation_reset=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "resetaggregation"),

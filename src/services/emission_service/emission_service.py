@@ -202,8 +202,21 @@ class EmissionService(BaseOperationService):
     
 
     def _update_total_emission(self) -> None:
-        # TODO
-        pass
+        try:
+            scope2_list = self._aas_client.get_value_list(self._config.scope2_list.id_short) # Liste aller Scope-2 Werte lesen
+            scope2sum = sum(float(value) for value in scope2_list) # Summe aller Scope-2 Werte berechnen
+        except Exception as e:
+            logger.error(f"Fehler beim Berechnen der Scope-2 Summe: {e}")
+            scope2sum = 0.0
+        
+        # Gesamt berechnen
+        self._total_emission = self._scope3_proxy + scope2sum
+
+        # zurück ins AAS schreiben
+        self._aas_client.set_value(
+            self._config.total_emission.id_short,
+            str(self._total_emission)
+        )
 
     def _update_all(self) -> None:
         """Initiale Werte beim Start laden."""

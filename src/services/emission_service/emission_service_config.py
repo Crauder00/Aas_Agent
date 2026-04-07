@@ -16,6 +16,7 @@ class EmissionServiceConfig:
     emission_factor: SubmodelElementConfig      # Pflichtfeld
     scope2_list: SubmodelElementConfig          # Pflichtfeld
     scope3_proxy: SubmodelElementConfig         # Pflichtfeld
+    total_emission: SubmodelElementConfig       # Pflichtfeld
     aggregation_value: SubmodelElementConfig    # Pflichtfeld
     aggregation_trigger: SubmodelElementConfig  # Pflichtfeld
     aggregation_reset: SubmodelElementConfig    # Pflichtfeld
