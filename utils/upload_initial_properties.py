@@ -46,6 +46,18 @@ property_emissionfactor = model.Property(
     ),)
 ))
 
+list_scope2_emissions = model.SubmodelElementList(
+    id_short='scope2emissionslist',
+    type_value_list_element=model.Property,         
+    value_type_list_element=model.datatypes.Float,  
+    semantic_id=model.ExternalReference(
+        (model.Key(
+            type_=model.KeyTypes.GLOBAL_REFERENCE,
+            value='https://example.org/ghg/scope2/list'
+        ),)
+    )
+)
+
 property_total_emissions = model.Property(
     id_short="totalemissions",
     value_type=model.datatypes.Float, 
@@ -94,6 +106,7 @@ property_triggeraggregation = model.Property(
 # Schritt 2.3: Submodel mit Properties verknüpfen
 # ─────────────────────────────────────────────
 submodel.submodel_element.add(property_emissionfactor)
+submodel.submodel_element.add(list_scope2_emissions)
 submodel.submodel_element.add(property_total_emissions)
 submodel.submodel_element.add(property_scope3_proxy)
 submodel.submodel_element.add(property_resetaggregation)
