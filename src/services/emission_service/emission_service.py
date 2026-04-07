@@ -198,6 +198,7 @@ class EmissionService(BaseOperationService):
             )
         )
         self._aas_client.post_value(self._config.scope2_list.id_short, new_prop) # uploaden als neues Element in die Liste
+        logger.info(f"Aggregationswert {self._aggregation_value} als neues Element in Scope-2 Liste gepostet")
         self._update_total_emission() # aufrufen, damit TotalEmission immer aktuell ist
     
 
@@ -217,6 +218,7 @@ class EmissionService(BaseOperationService):
             self._config.total_emission.id_short,
             str(self._total_emission)
         )
+        logger.info(f"Total Emission aktualisiert: {self._total_emission}")
 
     def _update_all(self) -> None:
         """Initiale Werte beim Start laden."""
