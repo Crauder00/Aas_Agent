@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import threading
 from src.core.base_operation_service import BaseOperationService, operation, GuardResult
@@ -5,6 +6,7 @@ from .emission_service_config import EmissionServiceConfig
 # from src.core.utils.aas_sm_http_client import AasSmHttpClient
 from src.core.utils.submodel_repository import SubmodelRepository
 # from .sensor_adapter import SensorAdapter
+from basyx.aas import model
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +158,11 @@ class EmissionService(BaseOperationService):
     def reset_aggregation(self, payload: str) -> None:
         """Bricht eine laufende Aggregation ab."""
         self._stop_aggregation.set()
+        self._aas_client.set_value(
+                # self._config.aggregation_reset.submodel_id,
+                self._config.aggregation_reset.id_short,
+                "false",
+            )
         logger.info("Aggregation stopp-Flag gesetzt")
 
     # ── Guards ────────────────────────────────────────────────────────────
@@ -179,8 +186,20 @@ class EmissionService(BaseOperationService):
     # ── Private Hilfsmethoden ─────────────────────────────────────────────
 
     def _update_aggregation_value(self) -> None:
-        # TODO: aggregierten Wert ins AAS zurückschreiben
-        pass
+        new_prop = model.Property(
+            id_short=None,
+            value_type=model.datatypes.Float,
+            value=self._aggregation_value,
+            semantic_id=model.ExternalReference(
+                (model.Key(
+                    type_=model.KeyTypes.GLOBAL_REFERENCE,
+                    value='https://example.org/ghg/scope2/list/value'
+                ),)
+            )
+        )
+        self._aas_client.post_value(self._config.scope2_list.id_short, new_prop) # uploaden als neues Element in die Liste
+        self._update_total_emission() # aufrufen, damit TotalEmission immer aktuell ist
+    
 
     def _update_total_emission(self) -> None:
         # TODO

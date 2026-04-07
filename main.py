@@ -1,3 +1,5 @@
+import signal
+import threading
 import logging
 from typing import Final
 
@@ -34,6 +36,7 @@ agent_config: AgentConfig = AgentConfig(
 
 emission_config: EmissionServiceConfig = EmissionServiceConfig(
     emission_factor=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "emissionfactor"),
+    scope2_list=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope2emissionslist"),
     scope3_proxy=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "scope3proxy"),
     aggregation_value=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "aggregationvalue"),
     aggregation_trigger=SubmodelElementConfig(LOCAL_AAS, CF_SUBMODEL_ID, "triggeraggregation"),
@@ -46,14 +49,20 @@ emission_config: EmissionServiceConfig = EmissionServiceConfig(
 # =============================================================================
 
 def main() -> None:
+    stop_event = threading.Event()
+
+    def handle_signal(sig, frame):
+        logging.info("Signal empfangen, beende...")
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
+
     agent = AasAgent(agent_config, emission_config)
     agent.start()
-
     print("Warte auf MQTT-Nachrichten...")
-    input("Drücke Enter zum Beenden...\n")
-
+    stop_event.wait()  # blockiert bis Ctrl+C oder systemctl stop
     agent.stop()
-
 
 if __name__ == "__main__":
     main()
