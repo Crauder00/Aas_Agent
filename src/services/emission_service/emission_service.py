@@ -95,8 +95,9 @@ class EmissionService(BaseOperationService):
         with self._scope3_proxy_lock:
             self._scope3_proxy = new_value
 
-        self._update_total_emission()
         logger.info(f"Scope3-Proxy aktualisiert: {new_value}")
+        self._update_total_emission()
+        
 
     @operation(topic="triggeraggregation", execute_when="onlyontrue")
     def trigger_aggregation(self, payload: str) -> None:
