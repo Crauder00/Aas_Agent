@@ -5,6 +5,7 @@ from typing import Any
 
 from aas_python_http_client import ApiClient, Configuration, SubmodelRepositoryAPIApi
 from aas_python_http_client.util import string_to_base64url
+from basyx.aas import model
 import json
 
 logger = logging.getLogger(__name__)
@@ -71,4 +72,28 @@ class SubmodelRepository:
 
         except Exception as e:
             logger.error(f"Fehler beim Schreiben von '{id_short}': {e}")
+            return False
+        
+    def post_value(self, id_short: str, body: model.Property) -> bool:
+        """
+        Fügt ein Property-Element zu einer SubmodelElementList hinzu.
+
+        Args:
+            id_short: IdShortPath zur Liste, z.B. "ExamplePropertyList"
+            body:     model.Property-Objekt (id_short muss None sein)
+
+        Returns:
+            True bei Erfolg, False bei Fehler
+        """
+        try:
+            self._submodel_client.post_submodel_element_by_path_submodel_repo(
+                body,
+                submodel_identifier=string_to_base64url(self._submodel_repo_id),
+                id_short_path=id_short,
+            )
+            logger.debug(f"Property (value='{body.value}') erfolgreich zu '{id_short}' hinzugefügt")
+            return True
+
+        except Exception as e:
+            logger.error(f"Fehler beim Hinzufügen zu '{id_short}': {e}")
             return False
