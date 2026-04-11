@@ -37,10 +37,10 @@ class SubmodelRepository:
             Wert als String, oder None bei Fehler
         """
         try:
-            submodel = self._submodel_client.get_submodel_by_id(
-                string_to_base64url(self._submodel_repo_id)
+            prop = self._submodel_client.get_submodel_element_by_path_submodel_repo(
+                string_to_base64url(self._submodel_repo_id),
+                id_short
             )
-            prop = submodel.submodel_element.get("id_short", id_short)
             value = prop.value
             logger.debug(f"Gelesener Wert '{id_short}': {value}")
             return str(value)
@@ -60,32 +60,13 @@ class SubmodelRepository:
             Liste von Werten als Strings, oder None bei Fehler
         """
         try:
-            submodel = self._submodel_client.get_submodel_by_id(
-                string_to_base64url(self._submodel_repo_id)
+            result = self._submodel_client.get_submodel_element_by_path_value_only_submodel_repo(
+                submodel_identifier=string_to_base64url(self._submodel_repo_id),
+                id_short_path=id_short
             )
 
-            # passendes Element finden
-            target_element = None
-            for element in submodel.submodel_element:
-                if element.id_short == id_short:
-                    target_element = element
-                    break
-
-            if target_element is None:
-                logger.error(f"Element '{id_short}' nicht gefunden")
-                return None
-
-            # prüfen ob es wirklich eine Liste ist
-            if not hasattr(target_element, "value"):
-                logger.error(f"Element '{id_short}' hat keine Werte")
-                return None
-
-            values = []
-            for item in target_element.value:
-                values.append(str(item.value))
-
-            logger.debug(f"Gelesene Liste '{id_short}': {values}")
-            return values
+            logger.debug(f"Gelesene Liste '{id_short}': {result}")
+            return result
 
         except Exception as e:
             logger.error(f"Fehler beim Lesen von Liste '{id_short}': {e}")
