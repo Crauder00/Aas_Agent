@@ -1,6 +1,11 @@
 from dataclasses import dataclass, field
-from src.config import SubmodelElementConfig
 
+@dataclass
+class SubmodelElementConfig:
+    """Referenz auf ein SubmodelElement in irgendeinem AAS-Repository."""
+    base_url: str
+    submodel_id: str
+    id_short: str
 
 # --- Scope2-spezifische Konfiguration ---
 
@@ -13,12 +18,13 @@ class AggregationConfig:
 @dataclass
 class EmissionServiceConfig:
     """Alles was EmissionService braucht."""
-    emission_factor: SubmodelElementConfig      # Pflichtfeld
-    scope2_list: SubmodelElementConfig          # Pflichtfeld
-    scope3_proxy: SubmodelElementConfig         # Pflichtfeld
-    total_emission: SubmodelElementConfig       # Pflichtfeld
-    aggregation_value: SubmodelElementConfig    # Pflichtfeld
-    aggregation_trigger: SubmodelElementConfig  # Pflichtfeld
-    aggregation_reset: SubmodelElementConfig    # Pflichtfeld
-    sensor: SubmodelElementConfig               # Pflichtfeld — base_url zeigt auf Sensor-Repository
-    aggregation: AggregationConfig = field(default_factory=AggregationConfig)
+    base_url: str                   # Pflichtfeld
+    submodel_id: str                # Pflichtfeld
+    sensor: SubmodelElementConfig   # Pflichtfeld — base_url zeigt auf Sensor-Repository
+    emission_factor_path: str       = "emissionfactor"
+    scope2_list_path: str           = "scope2emissionslist"
+    scope3_proxy_path: str          = "scope3proxy"
+    total_emission_path: str        = "totalemissions"
+    aggregation_trigger_path: str   = "triggeraggregation"
+    aggregation_reset_path: str     = "resetaggregation"
+    aggregation: AggregationConfig  = field(default_factory=AggregationConfig)

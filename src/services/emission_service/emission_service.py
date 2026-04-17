@@ -1,11 +1,8 @@
-from datetime import datetime
 import logging
 import threading
 from src.core.base_operation_service import BaseOperationService, operation, GuardResult
 from .emission_service_config import EmissionServiceConfig
-# from src.core.utils.aas_sm_http_client import AasSmHttpClient
 from src.core.utils.submodel_repository import SubmodelRepository
-# from .sensor_adapter import SensorAdapter
 from basyx.aas import model
 
 logger = logging.getLogger(__name__)
@@ -34,11 +31,7 @@ class EmissionService(BaseOperationService):
         self._aggregation_lock: threading.Lock = threading.Lock()
 
         # ── Clients ───────────────────────────────────────────────────────
-        # base_url wird aus emission_factor genommen — alle lokalen SubmodelElemente
-        # zeigen auf denselben AAS-Server
-        # self._aas_client: AasSmHttpClient = AasSmHttpClient(self._config.emission_factor.base_url)
-        # self._sensor_adapter: SensorAdapter = SensorAdapter(self._config.sensor)
-        self._aas_client: SubmodelRepository = SubmodelRepository(self._config.emission_factor.base_url, self._config.emission_factor.submodel_id)
+        self._aas_client: SubmodelRepository = SubmodelRepository(self._config.base_url, self._config.submodel_id)
         self._sensor_adapter: SubmodelRepository = SubmodelRepository(self._config.sensor.base_url, self._config.sensor.submodel_id)
 
         # ── Init: BaseOperationService aufrufen (baut Registry auf) ───────
@@ -55,8 +48,7 @@ class EmissionService(BaseOperationService):
         logger.info(f"Emissionsfaktor vor Aktualisierung: {self._emission_factor}")
 
         raw = self._aas_client.get_value(
-            # self._config.emission_factor.submodel_id,
-            self._config.emission_factor.id_short
+            self._config.emission_factor_path
         )
 
         if raw is None:
@@ -78,8 +70,7 @@ class EmissionService(BaseOperationService):
     def set_scope3_proxy(self, payload: str) -> None:
         """Liest den aktuellen Scope3-Proxy vom AAS und speichert ihn lokal."""
         raw = self._aas_client.get_value(
-            # self._config.scope3_proxy.submodel_id,
-            self._config.scope3_proxy.id_short
+            self._config.scope3_proxy_path
         )
 
         if raw is None:
@@ -124,7 +115,6 @@ class EmissionService(BaseOperationService):
 
                 # sensorread = self._sensor_adapter.get_sensor_reading()
                 sensorread = self._sensor_adapter.get_value(
-                    # self._config.sensor.submodel_id, 
                     self._config.sensor.id_short
                 )
 
@@ -150,8 +140,7 @@ class EmissionService(BaseOperationService):
                 self._update_aggregation_value()
                 self._aggregation_running = False
                 self._aas_client.set_value(
-                    # self._config.aggregation_trigger.submodel_id,
-                    self._config.aggregation_trigger.id_short,
+                    self._config.aggregation_trigger_path,
                     "false",
                 )
 
@@ -160,8 +149,7 @@ class EmissionService(BaseOperationService):
         """Bricht eine laufende Aggregation ab."""
         self._stop_aggregation.set()
         self._aas_client.set_value(
-                # self._config.aggregation_reset.submodel_id,
-                self._config.aggregation_reset.id_short,
+                self._config.aggregation_reset_path,
                 "false",
             )
         logger.info("Aggregation stopp-Flag gesetzt")
@@ -176,8 +164,7 @@ class EmissionService(BaseOperationService):
         if not running:
             logger.info("Reset ignoriert — keine Aggregation aktiv")
             self._aas_client.set_value(
-                # self._config.aggregation_reset.submodel_id,
-                self._config.aggregation_reset.id_short,
+                self._config.aggregation_reset_path,
                 "false",
             )
             return GuardResult(proceed=False, reason="Keine Aggregation aktiv")
@@ -198,14 +185,14 @@ class EmissionService(BaseOperationService):
                 ),)
             )
         )
-        self._aas_client.post_value(self._config.scope2_list.id_short, new_prop) # uploaden als neues Element in die Liste
+        self._aas_client.post_value(self._config.scope2_list_path, new_prop) # uploaden als neues Element in die Liste
         logger.info(f"Aggregationswert {self._aggregation_value} als neues Element in Scope-2 Liste gepostet")
         self._update_total_emission() # aufrufen, damit TotalEmission immer aktuell ist
     
 
     def _update_total_emission(self) -> None:
         try:
-            scope2_list = self._aas_client.get_value_list(self._config.scope2_list.id_short) # Liste aller Scope-2 Werte lesen
+            scope2_list = self._aas_client.get_value_list(self._config.scope2_list_path) # Liste aller Scope-2 Werte lesen
             scope2sum = sum(float(value) for value in scope2_list) # Summe aller Scope-2 Werte berechnen
         except Exception as e:
             logger.error(f"Fehler beim Berechnen der Scope-2 Summe: {e}")
@@ -216,7 +203,7 @@ class EmissionService(BaseOperationService):
 
         # zurück ins AAS schreiben
         self._aas_client.set_value(
-            self._config.total_emission.id_short,
+            self._config.total_emission_path,
             str(self._total_emission)
         )
         logger.info(f"Total Emission aktualisiert: {self._total_emission}")
