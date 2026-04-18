@@ -5,6 +5,7 @@ from typing import Final
 
 from src.aas_agent import AasAgent
 from src.aas_agent_config import AgentConfig
+from src.services.emission_service.emission_service import EmissionService
 from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig, SubmodelElementConfig
 
 logging.basicConfig(
@@ -18,12 +19,12 @@ logging.basicConfig(
 # =============================================================================
 
 LOCAL_AAS: Final[str] = "http://localhost:8081"
-SENSOR_AAS: Final[str] = "http://localhost:8081"
+SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
 CF_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
 SENSOR_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
 
 # =============================================================================
-# Konfiguration
+# Konfiguration des Agent und der Services
 # =============================================================================
 
 agent_config: AgentConfig = AgentConfig(
@@ -32,12 +33,15 @@ agent_config: AgentConfig = AgentConfig(
 )
 
 
-emission_config: EmissionServiceConfig = EmissionServiceConfig(
-    base_url    = LOCAL_AAS,
-    submodel_id = CF_SUBMODEL_ID,
-    sensor      = SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "totalemissions"),
-    aggregation = AggregationConfig(0.1, 3000)
+emission_config_station_0: EmissionServiceConfig = EmissionServiceConfig(
+    base_url      = LOCAL_AAS,
+    product_url   = LOCAL_AAS,
+    submodel_id   = CF_SUBMODEL_ID,
+    sensor        = SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "totalemissions"),
+    station_index = 0,
+    aggregation   = AggregationConfig(0.1, 3000)
 )
+
 
 # =============================================================================
 # Start
@@ -53,9 +57,16 @@ def main() -> None:
     signal.signal(signal.SIGTERM, handle_signal)
     signal.signal(signal.SIGINT, handle_signal)
 
-    agent = AasAgent(agent_config, emission_config)
+    # ── Start Agent ─────────────────────────────────────────────────────── 
+    services = [
+        EmissionService(emission_config_station_0)
+    ]
+
+    agent = AasAgent(agent_config, services)
     agent.start()
     print("Warte auf MQTT-Nachrichten...")
+
+    # ── End Agent ───────────────────────────────────────────────────────
     stop_event.wait()  # blockiert bis Ctrl+C oder systemctl stop
     agent.stop()
 

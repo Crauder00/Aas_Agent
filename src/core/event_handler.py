@@ -13,9 +13,8 @@ class EventHandler:
     Registry des BaseOperationService (nicht mehr TOPIC_OPERATION_MAP).
     """
 
-    def __init__(self, operation_service: BaseOperationService):
-        self._service = operation_service
-        self._registry = operation_service.get_registry()
+    def __init__(self):
+        self._registry: dict = {}
         self._executor = ThreadPoolExecutor(max_workers=2)
         self._last_values: dict[str, str] = {}  # idShort → letzter Wert
 
@@ -54,6 +53,15 @@ class EventHandler:
 
         logger.info(f"Operation ausgelöst: {config.method_name} (via '{id_short}')")
         self._executor.submit(method, payload)
+
+    def register_service(self, service: BaseOperationService) -> None:
+        """Registriert einen Service und merged seine Registry."""
+        new_entries = service.get_registry()
+        conflicts = set(new_entries) & set(self._registry)
+        if conflicts:
+            logger.warning(f"Registry-Konflikt für idShorts: {conflicts} — werden überschrieben")
+        self._registry.update(new_entries)
+        logger.info(f"Service registriert: {type(service).__name__} ({len(new_entries)} Einträge)")
 
     # ── Private Methoden ─────────────────────────────────
 
