@@ -27,15 +27,19 @@ class EmissionService(BaseOperationService):
 
         self._aggregation_running: bool = False
         self._stop_aggregation = threading.Event()
+        self._log_every_n_steps = max(1, round(10 / self._config.aggregation.aggregation_interval_seconds))
+        self._log_prefix = f"[Station {self._config.station_index}]"
 
         # ── Locks ─────────────────────────────────────────────────────────
         self._emission_factor_lock = threading.Lock()
         self._scope3_proxy_lock    = threading.Lock()
         self._aggregation_lock     = threading.Lock()
+        self._CFSubmodel_lock      = threading.Lock()
 
         # ── Clients ───────────────────────────────────────────────────────
         self._aas_client    = SubmodelRepository(self._config.base_url, self._config.submodel_id)
         self._sensor_adapter = SubmodelRepository(self._config.sensor.base_url, self._config.sensor.submodel_id)
+        self._product_client = None
 
         # ── BaseOperationService init (leere Registry) ────────────────────
         super().__init__()
@@ -43,6 +47,7 @@ class EmissionService(BaseOperationService):
         # ── Operationen anmelden  ─────────────────────────────────────────
         self.register(self.set_emission_factor, topic=self._config.emission_factor_path)
         self.register(self.set_scope3_proxy,    topic=self._config.scope3_proxy_path, execute_when = "never")
+        self.register(self._update_current_cf_submodel_path, topic=self._config.currentCFSubmodel_path)
         self.register(
             self.trigger_aggregation,
             topic        = self._config.aggregation_trigger_path,
@@ -54,6 +59,7 @@ class EmissionService(BaseOperationService):
             execute_when = "onlyontrue",
             guard        = self.check_aggregation_running,
         )
+        
         self._log_registry_summary()
 
         # ── Initiale Werte laden ───────────────────────────────────────────
@@ -62,21 +68,21 @@ class EmissionService(BaseOperationService):
     # ── Operationen ───────────────────────────────────────────────────────
 
     def set_emission_factor(self, payload: str) -> None:
-        logger.info(f"Emissionsfaktor vor Aktualisierung: {self._emission_factor}")
+        logger.info(f"{self._log_prefix} Emissionsfaktor vor Aktualisierung: {self._emission_factor}")
         raw = self._aas_client.get_value(self._config.emission_factor_path)
 
         if raw is None:
-            logger.error("set_emission_factor(): Wert konnte nicht gelesen werden")
+            logger.error(f"{self._log_prefix} set_emission_factor(): Wert konnte nicht gelesen werden")
             return
         try:
             new_value = float(raw)
         except ValueError:
-            logger.error(f"set_emission_factor(): Ungültiger Wert '{raw}'")
+            logger.error(f"{self._log_prefix} set_emission_factor(): Ungültiger Wert '{raw}'")
             return
 
         with self._emission_factor_lock:
             self._emission_factor = new_value
-        logger.info(f"Emissionsfaktor aktualisiert: {self._emission_factor}")
+        logger.info(f"{self._log_prefix} Emissionsfaktor aktualisiert: {self._emission_factor}")
 
     # TODO: mit VdV besprechen von wo der proxy3wert kommen soll??
     def set_scope3_proxy(self, payload: str) -> None:
@@ -100,19 +106,19 @@ class EmissionService(BaseOperationService):
     def trigger_aggregation(self, payload: str) -> None:
         with self._aggregation_lock:
             if self._aggregation_running:
-                logger.info("Aggregation läuft bereits — ignoriert")
+                logger.info(f"{self._log_prefix} Aggregation läuft bereits — ignoriert")
                 return
             self._aggregation_running = True
 
         self._stop_aggregation.clear()
         with self._aggregation_lock:
             self._aggregation_value = 0.0
-        logger.info("Aggregation gestartet")
+        logger.info(f"{self._log_prefix} Aggregation gestartet")
 
         try:
             for i in range(self._config.aggregation.aggregation_max_count):
                 if self._stop_aggregation.wait(timeout=self._config.aggregation.aggregation_interval_seconds):
-                    logger.info("Aggregation wird beendet (Stop-Flag erkannt)")
+                    logger.info(f"{self._log_prefix} Aggregation wird beendet (Stop-Flag erkannt)")
                     return
 
                 with self._emission_factor_lock:
@@ -121,9 +127,9 @@ class EmissionService(BaseOperationService):
                 sensorread = self._sensor_adapter.get_value(self._config.sensor.id_short)
 
                 if factor is None:
-                    logger.warning(f"Schritt {i+1}: kein Emissionsfaktor verfügbar")
+                    logger.warning(f"{self._log_prefix} Schritt {i+1}: kein Emissionsfaktor verfügbar")
                 if sensorread is None:
-                    logger.warning(f"Schritt {i+1}: kein Sensorwert verfügbar")
+                    logger.warning(f"{self._log_prefix} Schritt {i+1}: kein Sensorwert verfügbar")
                 else:
                     with self._aggregation_lock:
                         try:
@@ -133,11 +139,15 @@ class EmissionService(BaseOperationService):
                                 * (float(self._config.aggregation.aggregation_interval_seconds) / 3600.0)
                             )
                         except Exception as e:
-                            logger.error(f"Fehler bei Aggregationsberechnung: {e}")
-                        logger.info(f"Schritt {i+1}: Aggregationswert: {self._aggregation_value}")
+                            logger.error(f"{self._log_prefix} Fehler bei Aggregationsberechnung: {e}")
+                        logger.debug(f"{self._log_prefix} Schritt {i+1}: Aggregationswert: {self._aggregation_value}")
+                        #nur alle ~10sekunden einen wert loggen
+                        if (i + 1) % self._log_every_n_steps == 0:
+                            logger.info(f"{self._log_prefix} Schritt {i+1}: Aggregationswert: {self._aggregation_value}")
+                        
         finally:
             with self._aggregation_lock:
-                logger.info(f"Aggregation beendet. Endwert: {self._aggregation_value}")
+                logger.info(f"{self._log_prefix} Aggregation beendet. Endwert: {self._aggregation_value}")
                 self._update_aggregation_value()
                 self._aggregation_running = False
                 self._aas_client.set_value(self._config.aggregation_trigger_path, "false")
@@ -145,7 +155,7 @@ class EmissionService(BaseOperationService):
     def reset_aggregation(self, payload: str) -> None:
         self._stop_aggregation.set()
         self._aas_client.set_value(self._config.aggregation_reset_path, "false")
-        logger.info("Aggregation stopp-Flag gesetzt")
+        logger.info(f"{self._log_prefix} Aggregation stopp-Flag gesetzt")
 
     # ── Guards ────────────────────────────────────────────────────────────
 
@@ -154,7 +164,7 @@ class EmissionService(BaseOperationService):
             running = self._aggregation_running
 
         if not running:
-            logger.info("Reset ignoriert — keine Aggregation aktiv")
+            logger.info(f"{self._log_prefix} Reset ignoriert — keine Aggregation aktiv")
             self._aas_client.set_value(self._config.aggregation_reset_path, "false")
             return GuardResult(proceed=False, reason="Keine Aggregation aktiv")
 
@@ -175,7 +185,7 @@ class EmissionService(BaseOperationService):
             ),
         )
         self._aas_client.post_value(self._config.scope2_list_path, new_prop)
-        logger.info(f"Aggregationswert {self._aggregation_value} als neues Element in Scope-2 Liste gepostet")
+        logger.info(f"{self._log_prefix} Aggregationswert {self._aggregation_value} als neues Element in Scope-2 Liste gepostet")
         self._update_total_emission()
 
     # TODO: Change _update_total_emission to correctly read out current value and add aggregated value
@@ -184,7 +194,7 @@ class EmissionService(BaseOperationService):
             scope2_list = self._aas_client.get_value_list(self._config.scope2_list_path)
             scope2sum   = sum(float(v) for v in scope2_list)
         except Exception as e:
-            logger.error(f"Fehler beim Berechnen der Scope-2 Summe: {e}")
+            logger.error(f"{self._log_prefix} Fehler beim Berechnen der Scope-2 Summe: {e}")
             scope2sum = 0.0
 
         with self._scope3_proxy_lock:
@@ -192,29 +202,30 @@ class EmissionService(BaseOperationService):
 
         self._total_emission = scope3 + scope2sum
 
-        # ── Produkt-Submodel ermitteln und Wert schreiben ─────────────────
-        product_client = self._get_current_cf_submodel()
-
-        if product_client is None:
-            logger.warning("Total Emission nicht aktualisiert: kein Produkt-Submodel verfügbar")
+        if self._product_client is None:
+            logger.warning("{self._log_prefix} Total Emission nicht aktualisiert: kein Produkt-Submodel verfügbar")
             return
 
-        product_client.set_value(self._config.total_emission_path, str(self._total_emission))
-        logger.info(f"Total Emission aktualisiert: {self._total_emission}")
+        self._product_client.set_value(self._config.total_emission_path, str(self._total_emission))
+        logger.info(f"{self._log_prefix} Total Emission aktualisiert: {self._total_emission}")
 
     def _update_all(self) -> None:
         self.set_emission_factor(payload="")
         self.set_scope3_proxy(payload="")
+        self._update_current_cf_submodel_path()
         self._aggregation_value = 0.0
         self._total_emission    = 0.0
 
-    def _get_current_cf_submodel(self) -> SubmodelRepository | None:
+    def _update_current_cf_submodel_path(self) -> bool:
         """Liest den aktuellen CF-Submodel-Pfad aus dem calculation-Submodel und gibt einen Client zurück."""
         raw = self._aas_client.get_value(self._config.currentCFSubmodel_path)
 
         if not raw or not raw.strip():         # None, leer, nur Whitespace
-            logger.warning("currentCFSubmodel_path ist nicht gesetzt oder leer")
-            return None
-
-        logger.debug(f"currentCFSubmodel_path: '{raw.strip()}'")
-        return SubmodelRepository(self._config.product_url, raw.strip())
+            logger.warning("{self._log_prefix} currentCFSubmodel_path ist nicht gesetzt oder leer")
+            self._product_client = None
+            return False
+        else:
+            with self._CFSubmodel_lock:
+                logger.debug(f"{self._log_prefix} currentCFSubmodel_path: '{raw.strip()}'")
+                self._product_client = SubmodelRepository(self._config.product_url, raw.strip())
+            return True
