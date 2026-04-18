@@ -14,8 +14,8 @@ class EventHandler:
     """
 
     def __init__(self):
-        self._registry: dict = {}
-        self._executor = ThreadPoolExecutor(max_workers=2)
+        self._registry: dict[str, list] = {}
+        self._executor = ThreadPoolExecutor(max_workers=5)
         self._last_values: dict[str, str] = {}  # idShort → letzter Wert
 
     # ── Öffentliche Methoden ──────────────────────────────
@@ -28,39 +28,40 @@ class EventHandler:
             logger.warning(f"Topic konnte nicht geparst werden: {topic}")
             return
 
-        entry = self._registry.get(id_short.lower())
+        entries = self._registry.get(id_short.lower())
 
-        if entry is None:
+        if entries is None:
             logger.debug(f"Kein Handler für idShort: '{id_short}' — ignoriert")
             return
 
-        config, method, guard = entry
-
-        # execute_when prüfen
-        if not self._should_execute(config.execute_when, payload, id_short):
-            logger.debug(f"Operation übersprungen ({config.execute_when}): {config.method_name}")
+        # execute_when einmal prüfen — gilt für alle Handler dieses idShorts
+        # (Wert kommt aus dem Payload, nicht service-spezifisch)
+        first_config = entries[0][0]
+        if not self._should_execute(first_config.execute_when, payload, id_short):
+            logger.debug(f"Operation übersprungen ({first_config.execute_when})")
             return
 
-        # Guard prüfen (falls vorhanden)
-        if guard is not None:
-            result: GuardResult = guard()
-            if not result.proceed:
-                logger.info(
-                    f"Operation '{config.method_name}' durch Guard blockiert"
-                    + (f": {result.reason}" if result.reason else "")
-                )
-                return
+        for config, method, guard in entries:
+            # Guard pro Service prüfen
+            if guard is not None:
+                result: GuardResult = guard()
+                if not result.proceed:
+                    logger.info(
+                        f"Operation '{config.method_name}' durch Guard blockiert"
+                        + (f": {result.reason}" if result.reason else "")
+                    )
+                    continue  # nächsten Service prüfen, nicht return!
 
-        logger.info(f"Operation ausgelöst: {config.method_name} (via '{id_short}')")
-        self._executor.submit(method, payload)
+            logger.info(f"Operation ausgelöst: {config.method_name} (via '{id_short}')")
+            self._executor.submit(method, payload)
 
     def register_service(self, service: BaseOperationService) -> None:
-        """Registriert einen Service und merged seine Registry."""
+        """Registriert einen Services (mehrere Services pro idShort möglich)."""
         new_entries = service.get_registry()
-        conflicts = set(new_entries) & set(self._registry)
-        if conflicts:
-            logger.warning(f"Registry-Konflikt für idShorts: {conflicts} — werden überschrieben")
-        self._registry.update(new_entries)
+        for id_short, entry in new_entries.items():
+            if id_short not in self._registry:
+                self._registry[id_short] = []
+            self._registry[id_short].append(entry)
         logger.info(f"Service registriert: {type(service).__name__} ({len(new_entries)} Einträge)")
 
     # ── Private Methoden ─────────────────────────────────
