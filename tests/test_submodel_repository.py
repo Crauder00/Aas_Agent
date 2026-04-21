@@ -8,7 +8,7 @@ logging.basicConfig(
 )
 
 # from src.utils.aas_sm_http_client import AasSmHttpClient
-from src.core.utils.submodel_repository import SubmodelRepository as AasSmHttpClient
+from aas_agent.core.utils.submodel_repository import SubmodelRepository as AasSmHttpClient
 
 # ── Konfiguration ──────────────────────────────────────────────────────────────
 BASE_URL    = "http://192.168.1.101:8081"   # <-- anpassen

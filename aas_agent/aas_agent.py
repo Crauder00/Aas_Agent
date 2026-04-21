@@ -1,10 +1,12 @@
+# aas_agent.py
+
 import logging
 
-from src.aas_agent_config import AgentConfig
-from src.core.event_handler import EventHandler
-from src.core.event_listener import EventListener
-from src.core.base_operation_service import BaseOperationService
-from src.services.registration_service.registration_service import RegistrationService
+from .config.aas_agent_config import AgentConfig
+from .core.event_handler import EventHandler
+from .core.event_listener import EventListener
+from .core.base_operation_service import BaseOperationService
+from .services.registration_service.registration_service import RegistrationService
 
 logger = logging.getLogger(__name__)
 

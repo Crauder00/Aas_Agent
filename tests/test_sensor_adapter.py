@@ -7,8 +7,8 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-from src.sensor_adapter import SensorAdapter
-from src.config import AasSensorConfig
+from aas_agent.sensor_adapter import SensorAdapter
+from aas_agent.config import AasSensorConfig
 
 # ── Konfiguration ──────────────────────────────────────────────────────────────
 SENSOR_BASE_URL = "http://192.168.1.101:8081"   # <-- anpassen

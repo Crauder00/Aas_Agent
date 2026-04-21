@@ -1,3 +1,9 @@
+"""
+This Module should scann the Repository of a sub BaSyx AAS Server and register it as a Shell Discrioptor at the main server.
+
+Status: UNTESTED / UNDEBUGGED
+"""
+
 import logging
 import time
 
