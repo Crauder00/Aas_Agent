@@ -2,9 +2,10 @@
 
 import logging
 import threading
-from src.core.base_operation_service import BaseOperationService, GuardResult
-from .emission_service_config import EmissionServiceConfig
-from src.core.utils.submodel_repository import SubmodelRepository
+
+from ...core.base_operation_service import BaseOperationService, GuardResult
+from ...core.utils.submodel_repository import SubmodelRepository
+from ...config.emission_service_config import EmissionServiceConfig
 from basyx.aas import model
 
 logger = logging.getLogger(__name__)
@@ -201,12 +202,15 @@ class EmissionService(BaseOperationService):
             scope3 = self._scope3_proxy or 0.0
 
         self._total_emission = scope3 + scope2sum
+        
+        with self._CFSubmodel_lock:
+            client = self._product_client # lokale kopie des Clients um möglichst _product_client nicht lange zu blockieren
 
-        if self._product_client is None:
-            logger.warning("{self._log_prefix} Total Emission nicht aktualisiert: kein Produkt-Submodel verfügbar")
+        if client is None:
+            logger.warning(f"{self._log_prefix} Total Emission nicht aktualisiert: kein Produkt-Submodel verfügbar")
             return
 
-        self._product_client.set_value(self._config.total_emission_path, str(self._total_emission))
+        client.set_value(self._config.total_emission_path, str(self._total_emission))
         logger.info(f"{self._log_prefix} Total Emission aktualisiert: {self._total_emission}")
 
     def _update_all(self) -> None:
@@ -216,16 +220,16 @@ class EmissionService(BaseOperationService):
         self._aggregation_value = 0.0
         self._total_emission    = 0.0
 
-    def _update_current_cf_submodel_path(self) -> bool:
+    def _update_current_cf_submodel_path(self, payload: str = "") -> bool:
         """Liest den aktuellen CF-Submodel-Pfad aus dem calculation-Submodel und gibt einen Client zurück."""
         raw = self._aas_client.get_value(self._config.currentCFSubmodel_path)
 
         if not raw or not raw.strip():         # None, leer, nur Whitespace
-            logger.warning("{self._log_prefix} currentCFSubmodel_path ist nicht gesetzt oder leer")
+            logger.warning(f"{self._log_prefix} currentCFSubmodel_path ist nicht gesetzt oder leer")
             self._product_client = None
             return False
         else:
             with self._CFSubmodel_lock:
-                logger.debug(f"{self._log_prefix} currentCFSubmodel_path: '{raw.strip()}'")
+                logger.info(f"{self._log_prefix} currentCFSubmodel_path: '{raw.strip()}'")
                 self._product_client = SubmodelRepository(self._config.product_url, raw.strip())
             return True

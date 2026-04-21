@@ -7,7 +7,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-from src.utils.aas_sm_http_client import AasSmHttpClient
+from aas_agent.utils.aas_sm_http_client import AasSmHttpClient
 
 # ── Konfiguration ──────────────────────────────────────────────────────────────
 BASE_URL    = "http://192.168.1.128:8081"   # <-- anpassen

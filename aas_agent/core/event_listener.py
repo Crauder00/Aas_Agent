@@ -1,7 +1,10 @@
+# event_listener.py
+
 import logging
 import paho.mqtt.client as mqtt
 from typing import Callable
-from src.aas_agent_config import MqttConfig
+
+from ..config.mqtt_config import MqttConfig
 
 logger = logging.getLogger(__name__)
 

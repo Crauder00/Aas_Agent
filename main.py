@@ -3,10 +3,8 @@ import threading
 import logging
 from typing import Final
 
-from src.aas_agent import AasAgent
-from src.aas_agent_config import AgentConfig, MqttConfig
-from src.services.emission_service.emission_service import EmissionService
-from src.services.emission_service.emission_service_config import EmissionServiceConfig, AggregationConfig, SubmodelElementConfig
+from aas_agent import AasAgent, AgentConfig, MqttConfig, EmissionService, EmissionServiceConfig, AggregationConfig, SubmodelElementConfig
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +17,7 @@ logging.basicConfig(
 # =============================================================================
 
 LOCAL_AAS: Final[str] = "http://192.168.1.101:8081"
+Product_AAS: Final[str] = "http://192.168.1.128:8081"
 SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
 CF_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
 SENSOR_SUBMODEL_ID: Final[str] = "http://example.com/submodel/monitoring"
@@ -38,7 +37,7 @@ agent_config: AgentConfig = AgentConfig(
 
 emission_config_station_0: EmissionServiceConfig = EmissionServiceConfig(
     base_url      = LOCAL_AAS,
-    product_url   = LOCAL_AAS,
+    product_url   = Product_AAS,
     submodel_id   = CF_SUBMODEL_ID,
     sensor        = SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "sensorvalue0"),
     station_index = 0,
@@ -46,7 +45,7 @@ emission_config_station_0: EmissionServiceConfig = EmissionServiceConfig(
 )
 emission_config_station_1: EmissionServiceConfig = EmissionServiceConfig(
     base_url      = LOCAL_AAS,
-    product_url   = LOCAL_AAS,
+    product_url   = Product_AAS,
     submodel_id   = CF_SUBMODEL_ID,
     sensor        = SubmodelElementConfig(SENSOR_AAS, SENSOR_SUBMODEL_ID, "sensorvalue1"),
     station_index = 1,

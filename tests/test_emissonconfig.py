@@ -1,5 +1,5 @@
 from typing import Final
-from src.services.emission_service.emission_service_config import EmissionServiceConfig, SubmodelElementConfig
+from aas_agent.services.emission_service.emission_service_config import EmissionServiceConfig, SubmodelElementConfig
 
 
 SENSOR_AAS: Final[str] = "http://localhost:8081"

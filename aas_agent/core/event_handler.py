@@ -1,7 +1,9 @@
+# event_handler.py
+
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from .base_operation_service import BaseOperationService, OperationConfig, GuardResult
+from .base_operation_service import BaseOperationService, GuardResult
 
 logger = logging.getLogger(__name__)
 
