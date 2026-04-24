@@ -39,3 +39,4 @@ line-ending = "auto"
 
 [lint.per-file-ignores]
 "tests/**" = ["S101", "ANN", "D"]  # Tests brauchen keine Annotationen & Docstrings
+"__init__.py" = ["F401"]  # __init__.py darf ungenutzte Importe enthalten (für API-Exporte)
