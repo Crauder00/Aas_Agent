@@ -95,9 +95,21 @@ AAS_AGENT/aas_agent/config/
 
 ---
 
-### 5. Start Your AAS Server
+### 5. Prepare Your AAS Server
 
 Make sure your AAS server is running before starting the agent (e.g. Eclipse BaSyx Java V2 or BaSyx Go).
+
+Then upload the initial asset to your server — choose one of the following approaches:
+
+**Option A — Upload via `.aasx` file:**
+Use your AAS server's UI or API to upload the provided `Asset.aasx` package directly.
+
+**Option B — Upload via script:**
+```bash
+python utils/upload_initial_properties.py
+```
+
+> **Note:** The script needs a target URL. Make sure it is configured correctly before running it.
 
 ---
 
@@ -173,10 +185,7 @@ Additional use cases can be added under `aas_agent/services/` as Python modules.
 ```
 aas_agent/
 └── services/
-    ├── emission_service/
-    ├── your_custom_service/
-    │   ├── utilits_for_custom_service.py
-    │   └── your_custom_service.py   ← inherits from BaseOperationService
+    ├── your_custom_service.py   ← inherits from BaseOperationService
     └── ...
 ```
 
@@ -189,7 +198,7 @@ def main() -> None:
     services = [
         EmissionService(emission_config_station_0),
         EmissionService(emission_config_station_1),
-        YourCustomSercice(your_custom_config_0)  # Add more services
+        YOUR_OTHER_SERVICES_HERE(your_config_0)  # Add more services if needed
     ]
 
     ...
