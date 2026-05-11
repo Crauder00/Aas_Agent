@@ -185,7 +185,10 @@ Additional use cases can be added under `aas_agent/services/` as Python modules.
 ```
 aas_agent/
 └── services/
-    ├── your_custom_service.py   ← inherits from BaseOperationService
+    ├── emission_service/ 
+    ├── your_custom_service/
+    │   ├── utils_for_custom_service.py
+    │   └── your_custom_service.py   ← inherits from BaseOperationService
     └── ...
 ```
 
@@ -198,7 +201,7 @@ def main() -> None:
     services = [
         EmissionService(emission_config_station_0),
         EmissionService(emission_config_station_1),
-        YOUR_OTHER_SERVICES_HERE(your_config_0)  # Add more services if needed
+        YourCustomService(your_config_0)  # Add more services if needed
     ]
 
     ...
@@ -212,5 +215,5 @@ def main() -> None:
 
 ## Known Limitations
 
-- **`registration_service`** is currently under active development and not yet production-ready.
-- **BaSyx Go Server** does not yet support MQTT eventing — reactive event-driven behavior requires the BaSyx Java V2 server for the time being.
+- **`registration_service`** is currently under development and not yet tested.
+- **BaSyx Go Server** does not yet support MQTT eventing. reactive event-driven behavior requires the BaSyx Java V2 server for the time being. 
