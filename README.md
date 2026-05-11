@@ -69,7 +69,7 @@ uv --version
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/your-org/AAS_AGENT.git
+git clone https://github.com/Crauder00/Aas_Agent.git
 cd AAS_AGENT
 ```
 
