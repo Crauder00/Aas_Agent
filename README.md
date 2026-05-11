@@ -161,3 +161,47 @@ Check the status or logs:
 sudo systemctl status aas-agent.service
 sudo journalctl -u aas-agent.service -f
 ```
+
+---
+
+## Extending with Custom Use Cases
+
+Additional use cases can be added under `aas_agent/services/` as Python modules.
+
+> **Important:** Every custom service **must** inherit from `aas_agent/core/base_operation_service.py` to ensure compatibility with the agent's execution lifecycle.
+
+```
+aas_agent/
+└── services/
+    ├── emission_service/
+    ├── your_custom_service/
+    │   ├── utilits_for_custom_service.py
+    │   └── your_custom_service.py   ← inherits from BaseOperationService
+    └── ...
+```
+
+Once your service is implemented, register it in `main.py` by adding it to the `services` list and passing it to the agent:
+
+```python
+def main() -> None:
+    ...
+
+    services = [
+        EmissionService(emission_config_station_0),
+        EmissionService(emission_config_station_1),
+        YourCustomSercice(your_custom_config_0)  # Add more services
+    ]
+
+    ...
+
+    agent = AasAgent(agent_config, services)
+
+    ...
+```
+
+---
+
+## Known Limitations
+
+- **`registration_service`** is currently under active development and not yet production-ready.
+- **BaSyx Go Server** does not yet support MQTT eventing — reactive event-driven behavior requires the BaSyx Java V2 server for the time being.
