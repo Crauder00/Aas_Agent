@@ -1,0 +1,42 @@
+# Ruff-Konfiguration für Python 3.12+
+
+[lint]
+# Aktivierte Regel-Sets:
+# E    = pycodestyle – Errors       | PEP8-Verstösse: falsche Einrückung, fehlende Leerzeichen, etc.
+# W    = pycodestyle – Warnings     | PEP8-Warnungen: z.B. Whitespace am Zeilenende, leere Zeilen
+# F    = pyflakes                   | Logische Fehler: unused imports, undefinierte Variablen, etc.
+# I    = isort                      | Import-Reihenfolge: stdlib → third-party → first-party
+# UP   = pyupgrade                  | Veraltete Syntax ersetzen: z.B. Union[X, Y] → X | Y
+# B    = flake8-bugbear             | Häufige Bugs & schlechte Patterns: z.B. mutable default arguments
+# SIM  = flake8-simplify            | Vereinfachungen: z.B. if x == True → if x
+# D    = pydocstyle                 | Docstrings: Vollständigkeit, Format, Stil (Google Convention)
+# ANN  = flake8-annotations         | Typ-Annotationen: alle Parameter & Rückgabewerte müssen annotiert sein
+# ERA  = flake8-eradicate           | Auskommentierten Code erkennen und verbieten
+# N    = pep8-naming                | Namenskonventionen: snake_case für Funktionen, PascalCase für Klassen
+# RUF  = Ruff-native rules          | Ruff-eigene Regeln, die andere Tools nicht abdecken
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "D", "ANN", "ERA", "N", "RUF"]
+
+ignore = [
+    "E501",    # line too long (Formatter kümmert sich darum)
+    "SIM108",  # ternary operator (manchmal schlechter lesbar)
+    "D203",    # kollidiert mit D211 – eines von beiden muss weg
+    "D212",    # kollidiert mit D213 – eines von beiden muss weg
+    "ANN101",  # self in Methoden nicht annotieren (deprecated)
+]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+known-first-party = ["dein_paketname"]  # <-- anpassen!
+force-sort-within-sections = true
+
+[format]
+# Black-kompatibler Stil
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "ANN", "D"]  # Tests brauchen keine Annotationen & Docstrings
+"__init__.py" = ["F401"]  # __init__.py darf ungenutzte Importe enthalten (für API-Exporte)

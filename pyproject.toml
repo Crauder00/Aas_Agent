@@ -16,4 +16,5 @@ where = ["."]
 [dependency-groups]
 dev = [
     "py2puml>=0.11.0",
+    "ruff>=0.15.11",
 ]

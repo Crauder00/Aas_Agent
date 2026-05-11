@@ -1,8 +1,9 @@
-# event_listener.py
+"""event_listener.py - Event listener for MQTT-based AAS updates."""
 
+from collections.abc import Callable
 import logging
+
 import paho.mqtt.client as mqtt
-from typing import Callable
 
 from ..config.mqtt_config import MqttConfig
 
@@ -11,15 +12,17 @@ logger = logging.getLogger(__name__)
 
 class EventListener:
     """
-    Verbindet sich mit dem MQTT Broker und lauscht auf AAS-Updates.
-    Gibt eingehende Nachrichten via Callback weiter — keine Logik hier.
+    Connects to the MQTT broker and listens for AAS updates.
+
+    Passes incoming messages via callback — no logic here.
     """
 
     def __init__(
         self,
         config: MqttConfig,
         on_message: Callable[[str, str], None],
-    ):
+    ) -> None:
+        """Initialize the EventListener with MQTT configuration and message callback."""
         self._config = config
         self._on_message = on_message
         self._client = mqtt.Client(client_id=config.client_id)
@@ -29,39 +32,37 @@ class EventListener:
         self._client.on_message = self._handle_message
         self._client.on_disconnect = self._handle_disconnect
 
-    # ── Öffentliche Methoden ──────────────────────────────
+    # ── Public methods ──────────────────────────────
 
     def start(self) -> None:
-        """Verbinden und Loop im Hintergrund-Thread starten."""
+        """Connect and start loop in background thread."""
         logger.info(f"Verbinde mit MQTT Broker {self._config.host}:{self._config.port}")
         self._client.connect(self._config.host, self._config.port)
         # loop_start() startet einen eigenen Thread — blockiert nicht
         self._client.loop_start()
 
     def stop(self) -> None:
-        """Loop stoppen und Verbindung sauber trennen."""
+        """Stop the loop and disconnect cleanly."""
         self._client.loop_stop()
         self._client.disconnect()
-        logger.info("MQTT Verbindung getrennt")
+        logger.info("MQTT connection disconnected")
 
     # ── Private Callbacks (paho-intern) ──────────────────
 
-    def _handle_connect(self, client, userdata, flags, rc) -> None:
+    def _handle_connect(self, client: mqtt.Client, userdata: object, flags: dict, rc: int) -> None:
         if rc == 0:
-            logger.info("MQTT verbunden, abonniere Topics...")
+            logger.info("MQTT connected, subscribe to Topics...")
             client.subscribe(self._config.topic_filter)
-            # for topic in self._config.topic_filters:
-                # client.subscribe(topic)
         else:
-            logger.error(f"MQTT Verbindung fehlgeschlagen, Code: {rc}")
+            logger.error(f"MQTT connection failed, code: {rc}")
 
-    def _handle_message(self, client, userdata, message) -> None:
+    def _handle_message(self, client: mqtt.Client, userdata: object, message: mqtt.MQTTMessage) -> None:
         topic = message.topic
         payload = message.payload.decode("utf-8")
-        logger.debug(f"Nachricht empfangen: {topic}")
+        logger.debug(f"Message received: {topic}")
         # Weiterleiten an den EventHandler — dieser entscheidet was zu tun ist
         self._on_message(topic, payload)
 
-    def _handle_disconnect(self, client, userdata, rc) -> None:
+    def _handle_disconnect(self, client: mqtt.Client, userdata: object, rc: int) -> None:
         if rc != 0:
-            logger.warning(f"Unerwartete Trennung vom Broker (Code: {rc})")
+            logger.warning(f"Unexpected disconnection from broker (code: {rc})")

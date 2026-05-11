@@ -1,15 +1,21 @@
-# base_operation_service.py
+"""base_operation_service.py - Base class for all operation services."""
 
-import logging
-from abc import ABC
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
+import logging
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class OperationConfig:
+    """Holds the registration metadata for a single operation.
+
+    Attributes:
+        topic: The idShort of the SubmodelElement this operation listens to.
+        execute_when: Execution condition - one of: everytime | onlyontrue | onlyonfalse | never.
+        method_name: Name of the bound method, used for logging.
+    """
     topic:        str
     execute_when: str
     method_name:  str
@@ -17,19 +23,28 @@ class OperationConfig:
 
 @dataclass
 class GuardResult:
+    """
+    Return type of a guard function, indicating whether an operation should proceed.
+
+    Attributes:
+        proceed: If True, the operation is executed.
+        reason: Optional explanation, used for logging when proceed is False.
+    """
     proceed: bool
     reason:  str = ""
 
 
-class BaseOperationService(ABC):
+class BaseOperationService:
     """
-    Basisklasse für alle Operation-Services.
-    Subklassen rufen self.register() in ihrem __init__ auf
-    um Methoden für Topics anzumelden.
+    Abstract base class for all operation services.
+
+    Subclasses call self.register() in their __init__ to bind methods to topics.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the operation registry."""
         self._registry: dict[str, tuple[OperationConfig, Callable, Callable | None]] = {}
+
 
     def register(
         self,
@@ -39,13 +54,13 @@ class BaseOperationService(ABC):
         guard:        Callable | None = None,
     ) -> None:
         """
-        Registriert eine Methode für ein Topic.
+        Register a method for a given topic.
 
         Args:
-            method:       Gebundene Methode des Service (z.B. self.set_emission_factor)
-            topic:        idShort des SubmodelElements (aus Config)
-            execute_when: everytime | onlyontrue | onlyonfalse | never
-            guard:        Optionale Guard-Methode die GuardResult zurückgibt
+            method: Bound method of the service (e.g. self.set_emission_factor).
+            topic: idShort of the SubmodelElement (from config).
+            execute_when: Execution condition - everytime | onlyontrue | onlyonfalse | never.
+            guard: Optional guard function returning a GuardResult.
         """
         config = OperationConfig(
             topic=topic,
@@ -56,24 +71,25 @@ class BaseOperationService(ABC):
 
         if key in self._registry:
             logger.warning(
-                f"{self.__class__.__name__}: Topic '{topic}' wird überschrieben "
-                f"(war: '{self._registry[key][0].method_name}')"
+                f"{self.__class__.__name__}: Topic '{topic}' is being overwritten "
+                f"(previous: '{self._registry[key][0].method_name}')"
             )
 
         self._registry[key] = (config, method, guard)
         logger.debug(
-            f"Operation registriert: topic='{topic}' "
+            f"Operation registered: topic='{topic}' "
             f"method='{method.__name__}' "
             f"execute_when='{execute_when}' "
-            f"guard='{guard.__name__ if guard else 'keiner'}'"
+            f"guard='{guard.__name__ if guard else 'none'}'"
         )
 
     def get_registry(self) -> dict[str, tuple[OperationConfig, Callable, Callable | None]]:
-        """Gibt die Registry zurück — wird vom EventHandler verwendet."""
+        """Return the operation registry - used by the EventHandler to resolve incoming topics."""
         return self._registry
 
     def _log_registry_summary(self) -> None:
+        """Log a summary of all registered operations for this service."""
         logger.info(
-            f"{self.__class__.__name__}: {len(self._registry)} Operation(en) registriert: "
+            f"{self.__class__.__name__}: {len(self._registry)} Operation(s) registered: "
             f"{list(self._registry.keys())}"
         )

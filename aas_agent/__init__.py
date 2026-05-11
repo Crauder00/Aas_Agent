@@ -1,6 +1,19 @@
-# aas_agent.__init__.py
+"""aas_agent - Public API of the aas_agent package."""
 
-from .core import SubmodelRepository, BaseOperationService, GuardResult, EventListener, EventHandler
-from .services import RegistrationService, EmissionService
-from .config import RegisterConfig, MqttConfig, EmissionServiceConfig, AggregationConfig, SubmodelElementConfig, AgentConfig, MqttConfig, RegisterConfig
 from .aas_agent import AasAgent
+from .config import (
+    AgentConfig,
+    AggregationConfig,
+    EmissionServiceConfig,
+    MqttConfig,
+    RegisterConfig,
+    SubmodelElementConfig,
+)
+from .core import (
+    BaseOperationService,
+    EventHandler,
+    EventListener,
+    GuardResult,
+    SubmodelRepository,
+)
+from .services import EmissionService, RegistrationService

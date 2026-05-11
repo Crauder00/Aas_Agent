@@ -1,73 +1,67 @@
+"""emission_service_config.py - Configuration classes for the emission service."""
+
 from dataclasses import dataclass, field
-from typing import Optional
+
 
 @dataclass
 class SubmodelElementConfig:
-    """Referenz auf ein SubmodelElement in irgendeinem AAS-Repository."""
+    """Reference to a SubmodelElement in any AAS repository."""
     base_url: str
     submodel_id: str
     id_short: str
 
-# --- Scope2-spezifische Konfiguration ---
 
 @dataclass
 class AggregationConfig:
+    """Configuration for aggregation settings in the emission service."""
     aggregation_interval_seconds: int = 1    # Intervall zwischen Aggregationsschritten
     aggregation_max_count: int = 300         # Max Anzahl Schritte pro Lauf
 
 
 @dataclass
 class EmissionServiceConfig:
-    # Pflichtfelder:
+    """Configuration for the emission service."""
+    # Mandatory fields:
     base_url: str
     product_url: str
     submodel_id: str
     sensor: SubmodelElementConfig
     station_index: int
 
-    # Aggregation Einstellungen
-    aggregation: "AggregationConfig" = field(default_factory=lambda: AggregationConfig())
+    # Aggregation settings
+    aggregation: AggregationConfig = field(default_factory=lambda: AggregationConfig())
 
-    # optionale Overrides
-    scope2_list_path_override: Optional[str] = None
-    aggregation_trigger_path_override: Optional[str] = None
-    aggregation_reset_path_override: Optional[str] = None
-    currentCFSubmodel_override: Optional[str] = None
+    # Optional overrides for default paths
+    scope2_list_path_override: str | None = None
+    aggregation_trigger_path_override: str | None = None
+    aggregation_reset_path_override: str | None = None
+    current_cf_submodel_override: str | None = None
     emission_factor_path: str = "emissionfactor"
-    scope3_proxy_path: str          = "ProductCarbonFootprintProduction.TBD"
-    total_emission_path: str        = "ProductCarbonFootprintProduction.PcfCO2eq"
+    pcfco2eq_path: str        = "ProductCarbonFootprintProduction.PcfCO2eq"
 
-    # Hilfsfunktion zm
+    # Helper function for generating station paths
     def _station_path(self, suffix: str) -> str:
+        """Generate the station path with the given suffix."""
         return f"Stations[{self.station_index}].{suffix}"
 
+    # Setts the default paths based on the station index if no overrides are provided
     @property
     def scope2_list_path(self) -> str:
+        """Get the scope2 list path, using override if available."""
         return self.scope2_list_path_override or self._station_path("scope2emissionslist")
 
     @property
     def aggregation_trigger_path(self) -> str:
+        """Get the aggregation trigger path, using override if available."""
         return self.aggregation_trigger_path_override or self._station_path("triggeraggregation")
 
     @property
     def aggregation_reset_path(self) -> str:
+        """Get the aggregation reset path, using override if available."""
         return self.aggregation_reset_path_override or self._station_path("resetaggregation")
-    
+
     @property
-    def currentCFSubmodel_path(self) -> str:
-        return self.currentCFSubmodel_override or self._station_path("currentCFSubmodel")
+    def current_cf_submodel_path(self) -> str:
+        """Get the current Carbon Footprint submodel path, using override if available."""
+        return self.current_cf_submodel_override or self._station_path("currentCFSubmodel")
 
-
-# @dataclass
-# class EmissionServiceConfig:
-#     """Alles was EmissionService braucht."""
-#     base_url: str                   # Pflichtfeld
-#     submodel_id: str                # Pflichtfeld
-#     sensor: SubmodelElementConfig   # Pflichtfeld — base_url zeigt auf Sensor-Repository
-#     emission_factor_path: str       = "emissionfactor"
-#     scope2_list_path: str           = "scope2emissionslist"
-#     scope3_proxy_path: str          = "scope3proxy"
-#     total_emission_path: str        = "totalemissions"
-#     aggregation_trigger_path: str   = "triggeraggregation"
-#     aggregation_reset_path: str     = "resetaggregation"
-#     aggregation: AggregationConfig  = field(default_factory=AggregationConfig)

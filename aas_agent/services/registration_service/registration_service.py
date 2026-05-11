@@ -9,9 +9,9 @@ import time
 
 from aas_python_http_client import (
     ApiClient,
-    Configuration,
-    AssetAdministrationShellRepositoryAPIApi,
     AssetAdministrationShellRegistryAPIApi,
+    AssetAdministrationShellRepositoryAPIApi,
+    Configuration,
 )
 from aas_python_http_client.util import string_to_base64url
 
@@ -22,6 +22,7 @@ class RegistrationService:
     """Registriert AAS-Descriptoren vom Raspi-Repository beim zentralen Hauptserver."""
 
     def __init__(self, raspi_base_url: str, raspi_repo_url: str, main_registry_url: str) -> None:
+        """Initialisiert die RegistrationService mit den URLs für Raspi-Repository und Hauptserver."""
         self._raspi_base_url = raspi_base_url
 
         raspi_cfg = Configuration()
@@ -55,7 +56,7 @@ class RegistrationService:
                 logger.warning("Warte auf Raspi-Server...")
                 time.sleep(retry_interval)
 
-    def _build_descriptor(self, aas) -> dict:
+    def _build_descriptor(self, aas: dict) -> dict:
         submodel_refs = self._aas_repo.get_all_submodel_references_aas_repository(
             string_to_base64url(aas.id)
         ).result
