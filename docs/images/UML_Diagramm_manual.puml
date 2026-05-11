@@ -1,0 +1,101 @@
+@startuml aas_agent
+!pragma useIntermediatePackages false
+
+class aas_agent.core.utils.SubmodelRepository {
+  + get_value(id_short: str) : str | None:
+  + get_value_list(id_short: str) : list[str] | None:
+  + set_value(id_short: str, value: Any) : bool:
+}
+class aas_agent.core.BaseOperationService {
+  + register(method, topic, execute_when, guard) : None
+  + get_registry() : dict
+}
+
+class aas_agent.core.EventListener {
+  + start() : None
+  + stop() : None
+}
+class aas_agent.core.EventHandler {
+  + handle(topic: str, payload: str) : None
+  + register_service(service: BaseOperationService) : None
+}
+class aas_agent.services.RegistrationService {
+  _raspi_base_url: str
+  _aas_repo: None
+  _main_registry: None
+}
+class aas_agent.services.EmissionService {
+  + set_emission_factor(self, payload: str) : None
+  + update_current_cf_submodel_path(self, payload: str = "") : None
+  + trigger_aggregation(self, payload: str) : None
+  + reset_aggregation(self, payload: str) : None
+}
+class aas_agent.config.RegisterConfig {
+  mainserver_url: str
+  base_url: str
+}
+class aas_agent.config.MqttConfig {
+  host: str
+  port: int
+  topic_filter: str
+  client_id: str
+}
+class aas_agent.config.emission_service_config.EmissionServiceConfig {
+  base_url: str
+  product_url: str
+  submodel_id: str
+  station_index: int
+  sensor: SubmodelElementConfig
+  aggregation: AggregationConfig
+}
+class aas_agent.config.emission_service_config.AggregationConfig {
+  aggregation_interval_seconds: int
+  aggregation_max_count: int
+}
+class aas_agent.config.emission_service_config.SubmodelElementConfig {
+  base_url: str
+  submodel_id: str
+  id_short: str
+}
+class aas_agent.config.AgentConfig {
+  mqtt: MqttConfig
+  register_config: RegisterConfig | None
+}
+class aas_agent.AasAgent {
+  + start() : None
+  + stop() : None
+  + register() : None
+}
+
+aas_agent.core.EventListener *-- aas_agent.config.MqttConfig
+
+aas_agent.services.EmissionService *-- aas_agent.config.emission_service_config.EmissionServiceConfig
+aas_agent.services.EmissionService *-- aas_agent.core.utils.SubmodelRepository
+
+aas_agent.core.BaseOperationService <|-- aas_agent.services.EmissionService
+
+aas_agent.config.emission_service_config.EmissionServiceConfig *-- aas_agent.config.emission_service_config.SubmodelElementConfig
+aas_agent.config.emission_service_config.EmissionServiceConfig *-- aas_agent.config.emission_service_config.AggregationConfig
+
+aas_agent.config.AgentConfig *-- aas_agent.config.MqttConfig
+aas_agent.config.AgentConfig *-- aas_agent.config.RegisterConfig
+
+aas_agent.AasAgent *-- aas_agent.core.EventHandler
+aas_agent.AasAgent *-- aas_agent.core.EventListener
+aas_agent.AasAgent *-- aas_agent.services.EmissionService
+aas_agent.AasAgent *-- aas_agent.config.AgentConfig
+aas_agent.AasAgent *-- aas_agent.services.RegistrationService
+
+
+' note right of aas_agent.core.BaseOperationService::register
+'   method: Callable
+'   topic: str
+'   execute_when: str = "everytime"
+'   guard: Callable | None = None
+' end note
+
+' note right of aas_agent.core.BaseOperationService::get_registry
+'   returns: dict[str, tuple[OperationConfig, Callable, Callable | None]]
+' end note
+
+@enduml

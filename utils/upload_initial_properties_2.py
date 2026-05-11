@@ -71,6 +71,19 @@ def create_station(station_number: int) -> model.SubmodelElementCollection:
         )
     )
 
+    error_message = model.Property(
+        id_short="errorMessage",  # ← required (inside a collection)
+        display_name=model.MultiLanguageNameType({"en": "errorMessage"}),
+        value_type=model.datatypes.String,
+        value="",
+        semantic_id=model.ExternalReference(
+            (model.Key(
+                type_=model.KeyTypes.GLOBAL_REFERENCE,
+                value='https://example.org/ghg/station/error-message'
+            ),)
+        )
+    )
+
     station_collection = model.SubmodelElementCollection(
         id_short=None,  # ← must be None (direct child of a SubmodelElementList)
         display_name=model.MultiLanguageNameType({"en": f"Station {n}"}),
@@ -79,6 +92,7 @@ def create_station(station_number: int) -> model.SubmodelElementCollection:
             prop_trigger,
             prop_reset,
             list_emissions,
+            error_message,
         ]
     )
 
