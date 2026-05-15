@@ -28,7 +28,7 @@ ignore = [
 convention = "google"
 
 [lint.isort]
-known-first-party = ["dein_paketname"]  # <-- anpassen!
+known-first-party = ["aas_agent"]
 force-sort-within-sections = true
 
 [format]
