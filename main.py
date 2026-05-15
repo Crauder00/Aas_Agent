@@ -37,13 +37,13 @@ logging.basicConfig(
 LOCAL_AAS: Final[str] = "http://192.168.1.101:8081"
 """Base URL of the local AAS instance (edge device)."""
 
-Product_AAS: Final[str] = "http://192.168.1.128:8081"
+Product_AAS: Final[str] = "http://192.168.1.101:8081"
 """URL of the product AAA instance where the carbon footprint will be written."""
 
 SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
 """URL of the AAS instance that provides the sensor data."""
 
-CF_SUBMODEL_ID: Final[str] = "http://example.com/submodel/carbonfootprint"
+CF_SUBMODEL_ID: Final[str] = "https://zhaw.aas.ch/ids/sm/3365_2132_4062_5551"
 """Submodel ID for the carbon footprint submodel."""
 
 SENSOR_SUBMODEL_ID: Final[str] = "http://example.com/submodel/monitoring"
