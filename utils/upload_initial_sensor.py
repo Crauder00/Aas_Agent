@@ -57,13 +57,83 @@ property_monitoring1 = model.Property(
     ),)
 ))
 
+property_monitoring2 = model.Property(
+    id_short="sensorvalue2",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
+
+property_monitoring3 = model.Property(
+    id_short="sensorvalue3",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
+
+property_monitoring4 = model.Property(
+    id_short="sensorvalue4",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
+
+property_monitoring5 = model.Property(
+    id_short="sensorvalue5",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
+
+property_monitoring6 = model.Property(
+    id_short="sensorvalue6",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
+
+property_monitoring7 = model.Property(
+    id_short="sensorvalue7",
+    value_type=model.datatypes.Float, 
+    value=0.0,
+    semantic_id=model.ExternalReference(
+    (model.Key(
+        type_=model.KeyTypes.GLOBAL_REFERENCE,
+        value='https://example.org/engergy-monitoring'
+    ),)
+))
 
 # ─────────────────────────────────────────────
 # Schritt 2.3: Submodel mit Properties verknüpfen
 # ─────────────────────────────────────────────
 submodel.submodel_element.add(property_monitoring0)
 submodel.submodel_element.add(property_monitoring1)
-
+submodel.submodel_element.add(property_monitoring2)
+submodel.submodel_element.add(property_monitoring3)
+submodel.submodel_element.add(property_monitoring4)
+submodel.submodel_element.add(property_monitoring5)
+submodel.submodel_element.add(property_monitoring6)
+submodel.submodel_element.add(property_monitoring7)
 
 
 # ─────────────────────────────────────────────
