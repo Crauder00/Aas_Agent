@@ -18,6 +18,7 @@ ID_SHORTS_RESET   = [f"Stations[{i}].resetaggregation" for i in range(8)]  # Sta
 
 client = SubmodelRepository(BASE_URL, SUBMODEL_ID)
 
+# TRIGGER = True
 TRIGGER = False
 
 if TRIGGER:
