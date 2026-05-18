@@ -46,32 +46,44 @@ This turns a passive digital model (Type 1) not only into a digital shadow (Type
 
 ### Prerequisites
 
-- [Python](https://www.python.org/downloads/) 3.10+
 - A running AAS server (e.g. [Eclipse BaSyx](https://basyx.org/))
 
 ---
 
 ### 1. Install `uv`
 
+Follow the official installation guide: [docs.astral.sh/uv/getting-started/installation](https://docs.astral.sh/uv/getting-started/installation/)
+
+**Linux:**
 ```bash
-pip install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 Verify your installation:
-
 ```bash
 uv --version
 # Expected output: uv 0.10.8 or similar
 ```
 
+> **Note:** Make sure the `uv` binary is available in your `PATH`.
+
 ---
 
 ### 2. Clone the Repository
 
+**Using Git:**
 ```bash
 git clone https://github.com/Crauder00/Aas_Agent.git
 cd AAS_AGENT
 ```
+
+**Linux (without Git, via release archive):**
+```bash
+mkdir AAS_AGENT && cd AAS_AGENT
+curl -L -O https://github.com/Crauder00/Aas_Agent/releases/download/<version>/<release-file>.zip
+unzip <release-file>.zip
+```
+> **Note:** Replace `<version>` and `<release-file>` with the actual values from the [Releases page](https://github.com/Crauder00/Aas_Agent/releases).
 
 ---
 
@@ -80,7 +92,7 @@ cd AAS_AGENT
 Inside the `AAS_AGENT` folder, run:
 
 ```bash
-uv sync
+uv sync --no-dev
 ```
 
 ---
@@ -101,15 +113,8 @@ Make sure your AAS server is running before starting the agent (e.g. Eclipse BaS
 
 Then upload the initial asset to your server — choose one of the following approaches:
 
-**Option A — Upload via `.aasx` file:**
-Use your AAS server's UI or API to upload the provided `Asset.aasx` package directly.
-
-**Option B — Upload via script:**
-```bash
-python utils/upload_initial_properties.py
-```
-
-> **Note:** The script needs a target URL. Make sure it is configured correctly before running it.
+**Upload via `.aasx` file:**
+Use your AAS server's UI or API to upload the provided `ES_V3.aasx` package directly.
 
 ---
 
@@ -137,7 +142,7 @@ Create a new service file:
 sudo nano /etc/systemd/system/aas-agent.service
 ```
 
-Paste the following content, adjust the paths to your setup and update the logic to your needs:
+Paste the following content and adjust the paths to match your setup:
 
 ```ini
 [Unit]
@@ -146,9 +151,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/AAS_AGENT
-ExecStart=/home/pi/.local/bin/uv run python main.py
+User=<your-user>
+WorkingDirectory=/home/<your-user>/AAS_AGENT
+ExecStart=/home/<your-user>/.local/bin/uv run python main.py
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
@@ -158,6 +163,8 @@ Environment=PYTHONUNBUFFERED=1
 [Install]
 WantedBy=multi-user.target
 ```
+
+> **Note:** Replace all occurrences of `<your-user>` with your actual Linux username (e.g. `pi`).
 
 Enable and start the service:
 
@@ -173,6 +180,7 @@ Check the status or logs:
 sudo systemctl status aas-agent.service
 sudo journalctl -u aas-agent.service -f
 ```
+> **Note:** On first startup, `uv` may need to compile native dependencies from source (e.g. on ARM devices). This can take anywhere from a few seconds up to 30 minutes depending on your hardware.
 
 ---
 
