@@ -1,0 +1,166 @@
+May 18 09:41:22 CoreMP135 systemd[1]: Started aas-agent.service - AAS Agent.
+May 18 09:41:37 CoreMP135 uv[21992]: 09:41:37.568 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[0].currentcfsubmodel', 'stations[0].triggeraggregation', 'stations[0].resetaggregation']
+May 18 09:41:37 CoreMP135 uv[21992]: 09:41:37.572 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor before update: None
+May 18 09:41:37 CoreMP135 uv[21992]: 09:41:37.916 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor updated: 0.059
+May 18 09:41:37 CoreMP135 uv[21992]: 09:41:37.941 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] current_cf_submodel_path: 'https://admin-shell.io/idta/SubmodelTemplate/CarbonFootprint/1/0'
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.053 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[1].currentcfsubmodel', 'stations[1].triggeraggregation', 'stations[1].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.057 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.087 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.109 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 1] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.190 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[2].currentcfsubmodel', 'stations[2].triggeraggregation', 'stations[2].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.207 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.240 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.263 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 2] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.346 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[3].currentcfsubmodel', 'stations[3].triggeraggregation', 'stations[3].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.348 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.385 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.413 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 3] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.454 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[4].currentcfsubmodel', 'stations[4].triggeraggregation', 'stations[4].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.460 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.483 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.503 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 4] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.573 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[5].currentcfsubmodel', 'stations[5].triggeraggregation', 'stations[5].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.577 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.600 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.620 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 5] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.659 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[6].currentcfsubmodel', 'stations[6].triggeraggregation', 'stations[6].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.661 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.684 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.703 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 6] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.741 [INFO    ] aas_agent.core.base_operation_service — EmissionService: 4 Operation(s) registered: ['emissionfactor', 'stations[7].currentcfsubmodel', 'stations[7].triggeraggregation', 'stations[7].resetaggregation']
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.751 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor before update: None
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.784 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor updated: 0.059
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.804 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 7] current_cf_submodel_path is not set or empty
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.806 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.808 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.810 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.812 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.814 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.816 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.817 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.819 [INFO    ] aas_agent.core.event_handler — Service registered: EmissionService (4 Entries)
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.822 [INFO    ] aas_agent.aas_agent — AasAgent is starting...
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.824 [INFO    ] aas_agent.core.event_listener — Verbinde mit MQTT Broker 192.168.1.101:1883
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.832 [INFO    ] aas_agent.aas_agent — AasAgent is running.
+May 18 09:41:38 CoreMP135 uv[21992]: Waiting for MQTT messages...
+May 18 09:41:38 CoreMP135 uv[21992]: 09:41:38.837 [INFO    ] aas_agent.core.event_listener — MQTT connected, subscribe to Topics...
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.478 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.488 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.489 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.502 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.503 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.517 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.522 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.539 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.541 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.543 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.556 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.558 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.559 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.560 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.576 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.579 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.580 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.585 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.591 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.597 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.603 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor before update: 0.059
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.616 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.630 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor updated: 0.06
+May 18 09:41:58 CoreMP135 uv[21992]: 09:41:58.645 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor updated: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.053 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.058 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.060 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.063 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.065 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.075 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.075 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.085 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.087 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.110 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.117 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.118 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.118 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.123 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.141 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.142 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.144 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.151 [INFO    ] aas_agent.core.event_handler — Operation triggered: set_emission_factor (via 'emissionfactor')
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.153 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.166 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.168 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor before update: 0.06
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.190 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.197 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Emission factor updated: 0.059
+May 18 09:42:04 CoreMP135 uv[21992]: 09:42:04.207 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Emission factor updated: 0.059
+May 18 09:42:25 CoreMP135 uv[21992]: 09:42:25.966 [INFO    ] aas_agent.core.event_handler — Operation triggered: update_current_cf_submodel_path (via 'Stations[0].currentCFSubmodel')
+May 18 09:42:25 CoreMP135 uv[21992]: 09:42:25.995 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] current_cf_submodel_path: 'https://admin-shell.io/idta/SubmodelTemplate/CarbonFootprint/1/0'
+May 18 09:42:30 CoreMP135 uv[21992]: 09:42:30.273 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[0].triggeraggregation')
+May 18 09:42:30 CoreMP135 uv[21992]: 09:42:30.280 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation started
+May 18 09:42:42 CoreMP135 uv[21992]: 09:42:42.183 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 100: aggregation value: 0.0001638888888888887
+May 18 09:42:54 CoreMP135 uv[21992]: 09:42:54.048 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 200: aggregation value: 0.0003277777777777788
+May 18 09:43:05 CoreMP135 uv[21992]: 09:43:05.915 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 300: aggregation value: 0.0004916666666666701
+May 18 09:43:17 CoreMP135 uv[21992]: 09:43:17.850 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 400: aggregation value: 0.0006555555555555615
+May 18 09:43:29 CoreMP135 uv[21992]: 09:43:29.616 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 500: aggregation value: 0.0008194444444444528
+May 18 09:43:41 CoreMP135 uv[21992]: 09:43:41.550 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 600: aggregation value: 0.000983333333333344
+May 18 09:43:53 CoreMP135 uv[21992]: 09:43:53.385 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 700: aggregation value: 0.0011472222222222354
+May 18 09:44:05 CoreMP135 uv[21992]: 09:44:05.275 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 800: aggregation value: 0.0013111111111111268
+May 18 09:44:15 CoreMP135 uv[21992]: 09:44:15.005 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[0].resetaggregation')
+May 18 09:44:15 CoreMP135 uv[21992]: 09:44:15.026 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation finished. Final value: 0.0014455000000000177
+May 18 09:44:15 CoreMP135 uv[21992]: 09:44:15.064 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation value 0.0014455000000000177 posted as new entry in Scope-2 list
+May 18 09:44:15 CoreMP135 uv[21992]: 09:44:15.133 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] PcfCO2eq updated: 100.02063066111111
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.043 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[0].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.052 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.055 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[1].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.059 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.063 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[2].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.066 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.069 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[3].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.072 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.075 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[4].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.078 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.081 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[5].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.085 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.087 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[6].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.099 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Aggregation started
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.100 [INFO    ] aas_agent.core.event_handler — Operation triggered: trigger_aggregation (via 'Stations[7].triggeraggregation')
+May 18 09:45:36 CoreMP135 uv[21992]: 09:45:36.105 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Aggregation started
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.048 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Step 100: aggregation value: 0.0003277777777777774
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.052 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Step 100: aggregation value: 0.0001638888888888887
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.064 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Step 100: aggregation value: 0.0001638888888888887
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.096 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Step 100: aggregation value: 0.0003277777777777774
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.135 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Step 100: aggregation value: 0.0001638888888888887
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.252 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Step 100: aggregation value: 0.0003277777777777774
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.260 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Step 100: aggregation value: 0.0001638888888888887
+May 18 09:45:49 CoreMP135 uv[21992]: 09:45:49.295 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Step 100: aggregation value: 0.0003277777777777774
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.558 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[0].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.607 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[1].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.609 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation finished. Final value: 0.00021961111111111085
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.672 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[2].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.674 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Aggregation finished. Final value: 0.0004424999999999995
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.691 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[3].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.716 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[4].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.718 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Aggregation finished. Final value: 0.00022124999999999974
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.744 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] Aggregation value 0.00021961111111111085 posted as new entry in Scope-2 list
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.760 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Aggregation finished. Final value: 0.0004392222222222217
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.762 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[5].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.805 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 1] Aggregation value 0.0004424999999999995 posted as new entry in Scope-2 list
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.856 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Aggregation finished. Final value: 0.00022124999999999974
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.870 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[6].resetaggregation')
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.890 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 1] PcfCO2eq not updated: no product submodel available
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.904 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 2] Aggregation value 0.00022124999999999974 posted as new entry in Scope-2 list
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.917 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 3] Aggregation value 0.0004392222222222217 posted as new entry in Scope-2 list
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.951 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Aggregation finished. Final value: 0.0004424999999999995
+May 18 09:45:53 CoreMP135 uv[21992]: 09:45:53.953 [INFO    ] aas_agent.core.event_handler — Operation triggered: reset_aggregation (via 'Stations[7].resetaggregation')
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:53.965 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Aggregation finished. Final value: 0.00022124999999999974
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:53.981 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 2] PcfCO2eq not updated: no product submodel available
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:53.987 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 3] PcfCO2eq not updated: no product submodel available
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.033 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 0] PcfCO2eq updated: 100.02085027222222
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.045 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 4] Aggregation value 0.00022124999999999974 posted as new entry in Scope-2 list
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.076 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Aggregation finished. Final value: 0.00044577777777777725
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.109 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 5] Aggregation value 0.0004424999999999995 posted as new entry in Scope-2 list
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.142 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 4] PcfCO2eq not updated: no product submodel available
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.168 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 6] Aggregation value 0.00022124999999999974 posted as new entry in Scope-2 list
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.171 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 5] PcfCO2eq not updated: no product submodel available
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.187 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 6] PcfCO2eq not updated: no product submodel available
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.215 [INFO    ] aas_agent.services.emission_service.emission_service — [Station 7] Aggregation value 0.00044577777777777725 posted as new entry in Scope-2 list
+May 18 09:45:54 CoreMP135 uv[21992]: 09:45:54.232 [WARNING ] aas_agent.services.emission_service.emission_service — [Station 7] PcfCO2eq not updated: no product submodel available
