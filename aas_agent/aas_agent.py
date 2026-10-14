@@ -31,9 +31,11 @@ class AasAgent:
         for service in services:
             self._handler.register_service(service)
 
-        # Subscribe the handler's dispatch method to incoming MQTT events
+        # Bind the selected event source to the existing handler.
         self._listener: EventListener = EventListener(
-            agent_config.mqtt,
+            agent_config.listener
+            if agent_config.listener is not None
+            else agent_config.mqtt,
             on_message=self._handler.handle,
         )
 

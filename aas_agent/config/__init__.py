@@ -6,5 +6,6 @@ from .emission_service_config import (
     EmissionServiceConfig,
     SubmodelElementConfig,
 )
+from .listener_config import ListenerConfig, SubmodelWatch
 from .mqtt_config import MqttConfig
 from .registration_service_config import RegisterConfig

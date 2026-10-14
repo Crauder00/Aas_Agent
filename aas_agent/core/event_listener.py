@@ -1,31 +1,15 @@
 """Event sources for MQTT updates and periodic reconciliation."""
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
 import logging
 import threading
 
 import paho.mqtt.client as mqtt
 
+from ..config.listener_config import ListenerConfig as ListenerConfig
 from ..config.mqtt_config import MqttConfig
-from .event_handler import SubmodelWatch
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ListenerConfig(MqttConfig):
-    """Optional reconciliation settings; existing MqttConfig remains supported.
-
-    watches explicitly bind repositories/submodels to registered service instances.
-    topic_filter may be a string or a list of MQTT filters (Java and Go together).
-    Future event sources can call EventHandler.request_refresh directly.
-    """
-
-    mode: str = "mqtt"
-    poll_interval_seconds: float = 1.0
-    watches: list[SubmodelWatch] = field(default_factory=list)
-    topic_filter: str | list[str] = "basyx/submodelrepository/submodel/updated"
 
 
 class EventListener:

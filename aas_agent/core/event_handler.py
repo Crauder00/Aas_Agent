@@ -1,30 +1,15 @@
 """Normalize events, reconcile watched values and dispatch existing operations."""
 
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 import json
 import logging
 import threading
 
+from ..config.listener_config import SubmodelWatch
 from .base_operation_service import BaseOperationService, GuardResult
 from .utils.submodel_repository import SubmodelRepository
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class SubmodelWatch:
-    """Explicit binding to services already registered with AasAgent.
-
-    base_url is the REST repository URL as used by SubmodelRepository.
-    event_source optionally matches CloudEvent.source exactly, useful when
-    different repositories publish the same submodel ID to one broker.
-    """
-
-    base_url: str
-    submodel_id: str
-    services: list[BaseOperationService]
-    event_source: str | None = None
 
 
 class EventHandler:

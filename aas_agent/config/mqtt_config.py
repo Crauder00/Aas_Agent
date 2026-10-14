@@ -13,7 +13,10 @@ class MqttConfig:
         topic_filter: The topic filter for MQTT messages. Defaults to a standard filter.
         client_id: The MQTT client ID. Defaults to "aas-agent".
     """
-    host: str = "localhost" # standard host
-    port: int = 1883 # Standard MQTT-Port
-    topic_filter: str = "sm-repository/+/submodels/+/submodelElements/+/updated"  # Standard-Filter
+
+    host: str = "localhost"  # standard host
+    port: int = 1883  # Standard MQTT-Port
+    topic_filter: str | list[str] = (
+        "sm-repository/+/submodels/+/submodelElements/+/updated"  # Standard-Filter
+    )
     client_id: str = "aas-agent"

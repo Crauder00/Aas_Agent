@@ -107,6 +107,74 @@ AAS_AGENT/aas_agent/config/
 
 ---
 
+### Configuring MQTT or polling
+
+Create the service instances first, then bind their registered operation paths to
+an explicit repository and submodel using `watches`:
+
+```python
+from aas_agent import (
+    AasAgent, AgentConfig, EmissionService, ListenerConfig, SubmodelWatch,
+)
+
+# Define emission_config_station_0 and emission_config_station_1 as in main.py.
+services = [
+    EmissionService(emission_config_station_0),
+    EmissionService(emission_config_station_1),
+]
+
+agent_config = AgentConfig(
+    listener=ListenerConfig(
+        mode="mqtt",
+        host=MQTT_HOST,
+        watches=[
+            SubmodelWatch(
+                base_url=LOCAL_AAS,
+                submodel_id=CF_SUBMODEL_ID,
+                services=services,
+            ),
+        ],
+    ),
+)
+agent = AasAgent(agent_config, services)
+agent.start()
+# Keep the application running, then call agent.stop() on shutdown.
+```
+
+- `base_url` is the REST repository URL accessible from the agent.
+- `submodel_id` is the plain submodel ID, not Base64 encoded.
+- `services` contains the same instances passed to `AasAgent`. Their registered
+  paths determine which values are watched; submodels are not inferred from services.
+- Add another `SubmodelWatch` for each additional repository/submodel. Group services
+  watching the same repository/submodel in a single watch.
+- Optional `event_source` matches the CloudEvent `source` exactly when multiple
+  repositories publish the same submodel ID. REST requests still use `base_url`.
+
+The default MQTT filter is `basyx/submodelrepository/submodel/updated` for BaSyx Go.
+On a matching `io.admin-shell.submodel.updated.v1` CloudEvent, the handler reads
+registered values via REST and dispatches only detected changes. For BaSyx Java,
+set `topic_filter="sm-repository/+/submodels/+/submodelElements/+/updated"`.
+A list of filters can subscribe to both formats.
+
+For polling, replace the listener configuration with:
+
+```python
+ListenerConfig(
+    mode="polling",
+    poll_interval_seconds=1.0,
+    watches=[SubmodelWatch(LOCAL_AAS, CF_SUBMODEL_ID, services)],
+)
+```
+
+Polling opens no MQTT connection. In `main.py`, set `EVENT_MODE = "polling"`
+and adjust `POLL_INTERVAL_SECONDS`; the interval is used only for polling.
+Both modes establish an initial baseline without triggering operations, then
+apply the existing `execute_when` conditions and guards to value changes.
+The old `AgentConfig(mqtt=MqttConfig(...))` configuration remains supported for
+Java MQTT without watches. If `listener` is supplied, it takes precedence.
+
+---
+
 ### 5. Prepare Your AAS Server
 
 Make sure your AAS server is running before starting the agent (e.g. Eclipse BaSyx Java V2 or BaSyx Go).
@@ -224,4 +292,9 @@ def main() -> None:
 ## Known Limitations
 
 - **`registration_service`** is currently under development and not yet tested.
-- **BaSyx Go Server** does not yet support MQTT eventing. reactive event-driven behavior requires the BaSyx Java V2 server for the time being. 
+- **BaSyx Go adaptation is under development.** CloudEvent MQTT handling and
+  configurable polling are implemented, but live integration with BaSyx Go still
+  needs validation. REST endpoints and MQTT settings must match your deployment.
+- Reconciliation observes current values, not a complete event history. Rapid
+  changes between reads and repeated writes of the same value can be missed.
+  This limitation is accepted for the current prototype.
