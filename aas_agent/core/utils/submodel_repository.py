@@ -36,7 +36,7 @@ class SubmodelRepository:
         """
         try:
             prop = self._submodel_client.get_submodel_element_by_path_submodel_repo(
-                string_to_base64url(self._submodel_repo_id),
+                string_to_base64url(self._submodel_repo_id).rstrip("="),
                 id_short
             )
             value = prop.value
@@ -59,7 +59,7 @@ class SubmodelRepository:
         """
         try:
             result = self._submodel_client.get_submodel_element_by_path_value_only_submodel_repo(
-                submodel_identifier=string_to_base64url(self._submodel_repo_id),
+                submodel_identifier=string_to_base64url(self._submodel_repo_id).rstrip("="),
                 id_short_path=id_short
             )
 
@@ -85,7 +85,7 @@ class SubmodelRepository:
         try:
             self._submodel_client.patch_submodel_element_by_path_value_only_submodel_repo(
                 json.dumps(str(value)),
-                string_to_base64url(self._submodel_repo_id),
+                string_to_base64url(self._submodel_repo_id).rstrip("="),
                 id_short,
             )
             logger.debug(f"Wert '{id_short}' erfolgreich auf '{value}' gesetzt")
@@ -109,7 +109,7 @@ class SubmodelRepository:
         try:
             self._submodel_client.post_submodel_element_by_path_submodel_repo(
                 body,
-                submodel_identifier=string_to_base64url(self._submodel_repo_id),
+                submodel_identifier=string_to_base64url(self._submodel_repo_id).rstrip("="),
                 id_short_path=id_short,
             )
             logger.debug(f"Property (value='{body.value}') erfolgreich zu '{id_short}' hinzugefügt")

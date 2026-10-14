@@ -39,13 +39,13 @@ MQTT_HOST: Final[str] = "localhost"
 EVENT_MODE: Final = "mqtt"  # Change to "polling" to run without an MQTT broker.
 POLL_INTERVAL_SECONDS: Final[float] = 1.0
 
-LOCAL_AAS: Final[str] = "http://localhost:8081"
+LOCAL_AAS: Final[str] = "http://localhost:8082"
 """Base URL of the local AAS instance (edge device)."""
 
-Product_AAS: Final[str] = "http://localhost:8081"
+Product_AAS: Final[str] = "http://localhost:8082"
 """URL of the product AAA instance where the carbon footprint will be written."""
 
-SENSOR_AAS: Final[str] = "http://192.168.1.101:8081"
+SENSOR_AAS: Final[str] = "http://localhost:8082"
 """URL of the AAS instance that provides the sensor data."""
 
 CF_SUBMODEL_ID: Final[str] = "https://zhaw.aas.ch/ids/sm/3365_2132_4062_5551"
