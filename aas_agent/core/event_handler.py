@@ -1,121 +1,233 @@
-"""event_handler.py - Event handler for processing MQTT messages and triggering operations."""
-
-# event_handler.py
+"""Normalize events, reconcile watched values and dispatch existing operations."""
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 import json
 import logging
+import threading
 
 from .base_operation_service import BaseOperationService, GuardResult
+from .utils.submodel_repository import SubmodelRepository
 
 logger = logging.getLogger(__name__)
 
 
-class EventHandler:
-    """
-    Receives topic + payload from EventListener.
+@dataclass
+class SubmodelWatch:
+    """Explicit binding to services already registered with AasAgent.
 
-    Decides which operation is triggered — based on the generated
-    Registry out of the BaseOperationService.
+    base_url is the REST repository URL as used by SubmodelRepository.
+    event_source optionally matches CloudEvent.source exactly, useful when
+    different repositories publish the same submodel ID to one broker.
     """
+
+    base_url: str
+    submodel_id: str
+    services: list[BaseOperationService]
+    event_source: str | None = None
+
+
+class EventHandler:
+    """Keep source adapters separate from value comparison and operations."""
 
     def __init__(self) -> None:
-        """Initialize the EventHandler with empty registry and thread pool."""
+        """Create independent reconciliation and operation workers."""
         self._registry: dict[str, list] = {}
+        self._services: list[BaseOperationService] = []
         self._executor = ThreadPoolExecutor(max_workers=10)
-        self._last_values: dict[str, str] = {}  # idShort → letzter Wert
-
-    # ── Öffentliche Methoden ──────────────────────────────
-
-    def handle(self, topic: str, payload: str) -> None:
-        """Called by the EventListener.
-
-        Args:
-            topic: MQTT topic, e.g. sm-repository/+/submodels/+/submodelElements/{idShort}/updated
-            payload: JSON string with AAS update, e.g. {"value": "true"}
-        """
-        id_short = self._parse_id_short(topic)
-
-        if id_short is None:
-            logger.warning(f"Topic could not be parsed: {topic}")
-            return
-
-        entries = self._registry.get(id_short.lower())
-
-        if entries is None:
-            logger.debug(f"No handler for idShort: '{id_short}' — ignored")
-            return
-
-        # execute_when einmal prüfen — gilt für alle Handler dieses idShorts
-        # (Wert kommt aus dem Payload, nicht service-spezifisch)
-        first_config = entries[0][0]
-        if not self._should_execute(first_config.execute_when, payload, id_short):
-            logger.debug(f"Skipped operation ({first_config.execute_when})")
-            return
-
-        for config, method, guard in entries:
-            # Guard pro Service prüfen
-            if guard is not None:
-                result: GuardResult = guard()
-                if not result.proceed:
-                    logger.info(
-                        f"Operation '{config.method_name}' blocked by guard"
-                        + (f": {result.reason}" if result.reason else "")
-                    )
-                    continue  # nächsten Service prüfen, nicht return!
-
-            logger.info(f"Operation triggered: {config.method_name} (via '{id_short}')")
-            self._executor.submit(method, payload)
+        # A separate worker keeps REST and guards out of the MQTT callback.
+        self._refresh_executor = ThreadPoolExecutor(max_workers=1)
+        self._last_values: dict[object, str] = {}
+        self._watches: dict[
+            tuple[str, str], tuple[SubmodelRepository, dict, str | None]
+        ] = {}
+        self._pending: set[tuple[str, str]] = set()
+        self._lock = threading.RLock()
+        self._draining = False
+        self._closed = False
 
     def register_service(self, service: BaseOperationService) -> None:
-        """Registers a service (several services per idShort possible)."""
-        new_entries = service.get_registry()
-        for id_short, entry in new_entries.items():
-            if id_short not in self._registry:
-                self._registry[id_short] = []
-            self._registry[id_short].append(entry)
-        logger.info(f"Service registered: {type(service).__name__} ({len(new_entries)} Entries)")
+        """Register existing service operations without changing their API."""
+        self._services.append(service)
+        for path, entry in service.get_registry().items():
+            self._registry.setdefault(path.lower(), []).append(entry)
 
-    # ── Private Methoden ─────────────────────────────────
+    def configure_watches(self, watches: list[SubmodelWatch]) -> None:
+        """Use original configured paths for REST, never lowercased paths."""
+        for watch in watches:
+            key = (watch.base_url.rstrip("/"), watch.submodel_id)
+            if key in self._watches:
+                raise ValueError("Use one SubmodelWatch per repository/submodel")
+            entries: dict[str, list] = {}
+            for service in watch.services:
+                if not any(service is registered for registered in self._services):
+                    raise ValueError("Watched service must be registered with AasAgent")
+                for entry in service.get_registry().values():
+                    entries.setdefault(entry[0].topic, []).append(entry)
+            if not entries:
+                raise ValueError("SubmodelWatch requires registered operation paths")
+            self._watches[key] = (SubmodelRepository(*key), entries, watch.event_source)
+
+    def initialize_watches(self) -> None:
+        """First successful observation establishes a baseline without execution."""
+        self._refresh_executor.submit(self._initialize).result()
+
+    def _initialize(self) -> None:
+        for key in self._watches:
+            self._refresh(key, baseline=True)
+
+    def request_refresh(
+        self, submodel_id: str | None = None, source: str | None = None
+    ) -> None:
+        """Source-independent entry point for MQTT, polling and future adapters."""
+        with self._lock:
+            if self._closed:
+                return
+            self._pending.update(
+                key
+                for key, (_, _, expected_source) in self._watches.items()
+                if (submodel_id is None or key[1] == submodel_id)
+                and (
+                    source is None
+                    or expected_source is None
+                    or source == expected_source
+                )
+            )
+            if self._pending and not self._draining:
+                self._draining = True
+                self._refresh_executor.submit(self._drain)
+
+    def _drain(self) -> None:
+        while True:
+            with self._lock:
+                if not self._pending:
+                    self._draining = False
+                    return
+                key = self._pending.pop()
+            try:
+                self._refresh(key)
+            except Exception:
+                logger.exception("Could not reconcile submodel %s", key)
+
+    def _refresh(self, key: tuple[str, str], baseline: bool = False) -> None:
+        client, paths, _ = self._watches[key]
+        for path, entries in paths.items():
+            value = client.get_value(path)
+            if value is None:
+                continue  # Keep last successful observation on REST errors.
+            cache_key = (*key, path)
+            with self._lock:
+                last = self._last_values.get(cache_key)
+                self._last_values[cache_key] = value
+            if baseline or last is None or value == last:
+                continue
+            self._dispatch(entries, json.dumps({"value": value}), value, last)
+
+    def handle(self, topic: str, payload: str) -> None:
+        """Accept Go CloudEvents or the original Java element topics."""
+        try:
+            event = json.loads(payload)
+        except json.JSONDecodeError, TypeError:
+            logger.warning("Invalid JSON on %s", topic)
+            return
+        if not isinstance(event, dict):
+            return
+        if "specversion" in event:
+            if (
+                event.get("specversion") != "1.0"
+                or event.get("type") != "io.admin-shell.submodel.updated.v1"
+            ):
+                return
+            data = event.get("data")
+            submodel_id = (
+                data.get("submodelId") if isinstance(data, dict) else None
+            ) or event.get("subject")
+            if isinstance(submodel_id, str) and submodel_id:
+                source = event.get("source")
+                if source is None or isinstance(source, str):
+                    self.request_refresh(submodel_id, source)
+            return
+        path = self._parse_id_short(topic)
+        if path is None:
+            logger.debug("Unsupported event topic: %s", topic)
+            return
+        if self._watches:
+            # Java also uses reconciliation when watches are configured.
+            # The topic identifier can be encoded; checking configured watches
+            # avoids coupling this adapter to a particular Java encoding.
+            self.request_refresh()
+            return
+        entries = self._registry.get(path.lower(), [])
+        value = self._parse_value(payload)
+        with self._lock:
+            if self._closed:
+                return
+            last = self._last_values.get(path.lower())
+            if value is not None:
+                self._last_values[path.lower()] = value
+            self._dispatch(entries, payload, value, last)
+
+    def _dispatch(
+        self, entries: list, payload: str, value: str | None, last: str | None
+    ) -> None:
+        for config, method, guard in entries:
+            if not self._should_execute(config.execute_when, value, last):
+                continue
+            try:
+                if guard is not None:
+                    result: GuardResult = guard()
+                    if not result.proceed:
+                        logger.info(
+                            "Operation %s blocked: %s",
+                            config.method_name,
+                            result.reason,
+                        )
+                        continue
+                logger.info(
+                    "Operation triggered: %s (via %s)", config.method_name, config.topic
+                )
+                self._executor.submit(method, payload)
+            except Exception:
+                logger.exception("Could not dispatch %s", config.method_name)
 
     def _parse_id_short(self, topic: str) -> str | None:
-        """
-        Extracts the idShortPath from the topic.
-
-        Expectes: sm-repository/+/submodels/+/submodelElements/{idShort}/updated
-        """
         parts = topic.split("/")
-        if len(parts) >= 7 and parts[6] == "updated":
+        if (
+            len(parts) == 7
+            and parts[2] == "submodels"
+            and parts[4] == "submodelElements"
+            and parts[6] == "updated"
+        ):
             return parts[5]
         return None
 
     def _parse_value(self, payload: str) -> str | None:
-        """Extracts the value from the AAS JSON payload."""
         try:
-            return json.loads(payload).get("value", "").strip().lower()
-        except (json.JSONDecodeError, AttributeError):
-            logger.warning(f"Payload could not be parsed: {payload}")
+            value = json.loads(payload).get("value")
+            return None if value is None else str(value)
+        except json.JSONDecodeError, AttributeError, TypeError:
             return None
 
-    def _should_execute(self, execute_when: str, payload: str, id_short: str) -> bool:
-        """Decides whether to execute the operation based on execute_when."""
-        match execute_when:
-            case "everytime":
-                return True
-            case "never":
-                return False
-            case "onlyontrue" | "onlyonfalse":
-                value = self._parse_value(payload)
-                if value is None:
-                    return False
+    def _should_execute(
+        self, execute_when: str, value: str | None, last: str | None
+    ) -> bool:
+        if execute_when == "everytime":
+            return True
+        if execute_when == "never":
+            return False
+        if execute_when in {"onlyontrue", "onlyonfalse"}:
+            target = "true" if execute_when == "onlyontrue" else "false"
+            return (
+                value is not None
+                and value.strip().lower() == target
+                and (last is None or last.strip().lower() != target)
+            )
+        logger.warning("Unknown execute_when: %s", execute_when)
+        return False
 
-                last = self._last_values.get(id_short)
-                self._last_values[id_short] = value
-
-                if execute_when == "onlyontrue":
-                    return value == "true" and last != "true"
-                else:
-                    return value == "false" and last != "false"
-            case _:
-                logger.warning(f"Unknown execute_when value: '{execute_when}' — skipped")
-                return False
+    def close(self) -> None:
+        """Finish reconciliation before shutting down operation execution."""
+        with self._lock:
+            self._closed = True
+        self._refresh_executor.shutdown(wait=True)
+        self._executor.shutdown(wait=True)
