@@ -43,12 +43,26 @@ class EventHandler:
             key = (watch.base_url.rstrip("/"), watch.submodel_id)
             if key in self._watches:
                 raise ValueError("Use one SubmodelWatch per repository/submodel")
+            selected_topics = (
+                set(watch.operation_topics)
+                if watch.operation_topics is not None
+                else None
+            )
             entries: dict[str, list] = {}
             for service in watch.services:
                 if not any(service is registered for registered in self._services):
                     raise ValueError("Watched service must be registered with AasAgent")
                 for entry in service.get_registry().values():
-                    entries.setdefault(entry[0].topic, []).append(entry)
+                    path = entry[0].topic
+                    if selected_topics is None or path in selected_topics:
+                        entries.setdefault(path, []).append(entry)
+            if selected_topics is not None:
+                unknown_topics = selected_topics - entries.keys()
+                if unknown_topics:
+                    raise ValueError(
+                        f"SubmodelWatch {key}: operation_topics contains paths "
+                        f"not registered by its services: {sorted(unknown_topics)}"
+                    )
             if not entries:
                 raise ValueError("SubmodelWatch requires registered operation paths")
             self._watches[key] = (SubmodelRepository(*key), entries, watch.event_source)

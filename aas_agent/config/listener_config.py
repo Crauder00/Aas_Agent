@@ -18,12 +18,16 @@ class SubmodelWatch:
     base_url is the REST repository URL as used by SubmodelRepository.
     event_source optionally matches CloudEvent.source exactly, useful when
     different repositories publish the same submodel ID to one broker.
+    operation_topics selects exact registered idShort paths from these services.
+    None watches all their registered paths; an empty or unknown selection is
+    rejected when configuring the handler.
     """
 
     base_url: str
     submodel_id: str
     services: list[BaseOperationService]
     event_source: str | None = None
+    operation_topics: list[str] | None = None
 
 
 @dataclass

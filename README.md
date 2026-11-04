@@ -149,6 +149,41 @@ agent.start()
   watching the same repository/submodel in a single watch.
 - Optional `event_source` matches the CloudEvent `source` exactly when multiple
   repositories publish the same submodel ID. REST requests still use `base_url`.
+- Optional `operation_topics` selects exact, case-sensitive registered operation
+  paths from the watch's services. Omit it (or use `None`) to watch all their
+  registered paths. Empty lists and unknown paths are rejected at startup.
+
+One service can react to different paths in multiple submodels. Reuse the same
+service instance and select the paths belonging to each submodel:
+
+```python
+# agv_service is an existing service instance registering these three paths.
+services = [agv_service]
+agent_config = AgentConfig(
+    listener=ListenerConfig(
+        mode="polling",
+        poll_interval_seconds=1.0,
+        watches=[
+            SubmodelWatch(
+                base_url=LOCAL_AAS,
+                submodel_id="https://www.example.com/subodel/partstorage/1",
+                services=services,
+                operation_topics=["Red_parts", "min_number_red_parts"],
+            ),
+            SubmodelWatch(
+                base_url=LOCAL_AAS,
+                submodel_id="https://www.example.com/subodel/agv/1",
+                services=services,
+                operation_topics=["min_battery_allowed"],
+            ),
+        ],
+    ),
+)
+agent = AasAgent(agent_config, services)
+```
+
+Each watch reads only its selected paths. Service methods remain responsible for
+using the correct repository and submodel for their own REST reads and writes.
 
 The default MQTT filter is `basyx/submodelrepository/submodel/updated` for BaSyx Go.
 On a matching `io.admin-shell.submodel.updated.v1` CloudEvent, the handler reads
@@ -298,3 +333,4 @@ def main() -> None:
 - Reconciliation observes current values, not a complete event history. Rapid
   changes between reads and repeated writes of the same value can be missed.
   This limitation is accepted for the current prototype.
+
