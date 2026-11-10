@@ -397,6 +397,10 @@ options can be taken from your service configuration.
 - `stop()` prevents further scheduling, cancels queued invocations and waits for
   running methods/guards. Python threads cannot forcibly interrupt a running
   method: use bounded I/O and cooperative cancellation for long-running work.
+  When called from a periodic method or guard, shutdown completes asynchronously
+  on a separate thread so the callback can return without joining itself.
+  A subsequent `stop()` from outside a periodic callback waits for all periodic
+  workers to finish, including the callback that requested shutdown.
   Repeated `start()`/`stop()` calls are harmless, but a stopped agent cannot be
   restarted; create a new agent instead. Jobs are not persisted across restarts.
 

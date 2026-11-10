@@ -248,6 +248,108 @@ class OperationSchedulerTests(unittest.TestCase):
 
 
 class SchedulerLifecycleTests(unittest.TestCase):
+    def assert_agent_callback_shutdown(self, *, from_guard):
+        returned = threading.Event()
+        release_callback = threading.Event()
+        release_others = threading.Event()
+        others_entered = [threading.Event(), threading.Event()]
+        external_stopped = threading.Event()
+        service = BaseOperationService()
+        method = Mock(__name__="guarded_method")
+
+        def stop_from_callback():
+            for entered in others_entered:
+                if not entered.wait(2):
+                    raise RuntimeError("Other worker did not start")
+            agent.stop()
+            returned.set()
+            release_callback.wait(5)
+            return GuardResult(True)
+
+        def other_worker(index):
+            others_entered[index].set()
+            release_others.wait(5)
+
+        service.register_periodic(
+            method if from_guard else stop_from_callback,
+            0.01,
+            guard=stop_from_callback if from_guard else None,
+        )
+        for index in range(2):
+            # Distinct callbacks ensure both later executors own live workers.
+            def other(index=index):
+                other_worker(index)
+
+            service.register_periodic(other, 0.01)
+
+        agent = AasAgent(AgentConfig(event_mode="disabled"), [service])
+        self.addCleanup(agent.stop)
+        self.addCleanup(release_others.set)
+        self.addCleanup(release_callback.set)
+        agent.start()
+        self.assertTrue(returned.wait(2), "agent.stop() failed inside the callback")
+        self.assertTrue(agent._scheduler._stop.is_set())
+
+        def external_stop():
+            agent.stop()
+            external_stopped.set()
+
+        waiter = threading.Thread(target=external_stop)
+        waiter.start()
+        try:
+            self.assertFalse(external_stopped.wait(0.05))
+            release_callback.set()
+            # The stop must also wait for executors after the caller's executor.
+            self.assertFalse(external_stopped.wait(0.05))
+        finally:
+            release_callback.set()
+            release_others.set()
+            waiter.join(3)
+        self.assertTrue(external_stopped.is_set())
+        self.assertFalse(agent._scheduler._thread.is_alive())
+        self.assertFalse(agent._scheduler._shutdown_thread.is_alive())
+        for job in agent._scheduler._jobs:
+            self.assertTrue(job.future.done())
+            self.assertTrue(
+                all(not thread.is_alive() for thread in job.executor._threads)
+            )
+            with self.assertRaises(RuntimeError):
+                job.executor.submit(lambda: None)
+        if from_guard:
+            method.assert_not_called()
+
+    def test_agent_stop_from_periodic_method_joins_all_executors(self):
+        self.assert_agent_callback_shutdown(from_guard=False)
+
+    def test_agent_stop_from_periodic_guard_joins_all_executors(self):
+        self.assert_agent_callback_shutdown(from_guard=True)
+
+    def test_simultaneous_callbacks_can_stop_scheduler_without_waiting_on_each_other(
+        self,
+    ):
+        barrier = threading.Barrier(2)
+        service = BaseOperationService()
+        returned = [threading.Event(), threading.Event()]
+
+        def stop(index):
+            barrier.wait(timeout=2)
+            scheduler.stop()
+            returned[index].set()
+
+        for index in range(2):
+
+            def callback(index=index):
+                stop(index)
+
+            service.register_periodic(callback, 0.01)
+        scheduler = OperationScheduler([service])
+        self.addCleanup(scheduler.stop)
+        scheduler.start()
+        for completed in returned:
+            self.assertTrue(completed.wait(2))
+        scheduler.stop()
+        self.assertFalse(scheduler._shutdown_thread.is_alive())
+
     def test_timer_only_agent_runs_without_event_infrastructure(self):
         called = threading.Event()
         service = BaseOperationService()

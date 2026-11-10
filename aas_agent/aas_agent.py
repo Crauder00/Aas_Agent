@@ -73,6 +73,7 @@ class AasAgent:
     def stop(self) -> None:
         """Stop the AAS EventListener and all services gracefully."""
         if self._stopped:
+            self._scheduler.stop()
             return
         self._stopped = True
         logger.info("AasAgent is stopped...")

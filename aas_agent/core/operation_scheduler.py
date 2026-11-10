@@ -51,6 +51,9 @@ class OperationScheduler:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._closed = False
+        self._callback_context = threading.local()
+        self._shutdown_lock = threading.Lock()
+        self._shutdown_thread: threading.Thread | None = None
 
     def start(self) -> None:
         """Anchor intervals at startup; repeated starts are harmless."""
@@ -77,10 +80,25 @@ class OperationScheduler:
     def stop(self) -> None:
         """Stop dispatch, cancel queued calls and wait for running calls.
 
+        A periodic method or guard initiates shutdown asynchronously so its own
+        worker can return. External callers, including repeated stop() calls,
+        wait for the shared shutdown thread to finish joining every executor.
         Running Python methods cannot be forcibly interrupted. Service I/O must
         use timeouts so graceful shutdown can finish.
         """
         self.request_stop()
+        with self._shutdown_lock:
+            if self._shutdown_thread is None:
+                self._shutdown_thread = threading.Thread(
+                    target=self._shutdown, name="aas-scheduler-shutdown", daemon=False
+                )
+                self._shutdown_thread.start()
+            shutdown_thread = self._shutdown_thread
+        if not getattr(self._callback_context, "active", False):
+            shutdown_thread.join()
+
+    def _shutdown(self) -> None:
+        """Join the timer and every executor from outside callback workers."""
         if self._thread is not None:
             self._thread.join()
         for job in self._jobs:
@@ -119,6 +137,7 @@ class OperationScheduler:
 
     def _invoke(self, job: _Job, scheduled: float) -> None:
         operation = job.operation
+        self._callback_context.active = True
         try:
             if self._stop.is_set():
                 return
@@ -153,3 +172,5 @@ class OperationScheduler:
                 )
         except Exception:
             logger.exception("Periodic operation %s failed", job.name)
+        finally:
+            self._callback_context.active = False
