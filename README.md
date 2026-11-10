@@ -324,6 +324,93 @@ def main() -> None:
 
 ---
 
+## Periodic services (including timer-only agents)
+
+Services can register synchronous, parameterless methods independently of event
+topics. Register methods in the service constructor before passing the service
+to `AasAgent`:
+
+```python
+import threading
+
+from aas_agent import AasAgent, AgentConfig, BaseOperationService
+
+
+class BatteryService(BaseOperationService):
+    def __init__(self):
+        super().__init__()
+        self.register_periodic(
+            self.read_batteries,
+            interval_seconds=300,
+            timing="soft",
+            max_lateness_seconds=30,
+        )
+
+    def read_batteries(self):
+        # Read batteries and update application state / the AAS here.
+        # Use network timeouts so shutdown can finish.
+        print("Reading batteries")
+
+
+agent = AasAgent(AgentConfig(event_mode="disabled"), [BatteryService()])
+try:
+    agent.start()
+    threading.Event().wait()
+except KeyboardInterrupt:
+    pass
+finally:
+    agent.stop()
+```
+
+`event_mode="disabled"` creates no MQTT listener, polling source or event handler.
+The default `event_mode="enabled"` retains existing behavior. A service can use
+both `register(...)` and `register_periodic(...)` when events are enabled; timer
+registrations do not require a topic or a submodel watch. Intervals and timing
+options can be taken from your service configuration.
+
+### Timing and execution rules
+
+- The first call is due **one full interval after successful event-source
+  initialization** (or startup for a timer-only agent). Intervals use a monotonic
+  clock and fixed-rate scheduling: a method's runtime does not shift the next
+  scheduled time. This is relative scheduling, not alignment to wall-clock minutes.
+- `timing="soft"`: run when idle, even if late. An optional
+  `max_lateness_seconds` emits a warning when exceeded; omitting it allows any
+  start delay.
+- `timing="hard"`: `max_lateness_seconds` is required. A start beyond this
+  tolerance logs an error and is skipped by default. Use `late_policy="run"`
+  to execute anyway after logging the error. Missed ticks and busy-worker skips
+  also log errors. The tolerance measures the start of the method, including
+  time spent in its optional guard.
+- Missed intervals are coalesced into the most recent due tick. There is no
+  catch-up burst. `overlap="skip"` is the only supported overlap policy: at most
+  one pending or running invocation per registration. A busy method loses that
+  tick and is considered again at the next scheduled tick.
+- Each registration has a dedicated worker, independent of event workers and
+  other periodic operations. This consumes up to one worker thread per job.
+  Exceptions in methods or guards are logged; later intervals remain scheduled.
+  `guard=` accepts the same parameterless `GuardResult` guards as event operations.
+- Register a method only once per service instance. Independent service instances
+  have independent schedules. Guards and methods must be synchronous and callable
+  without arguments. Scheduling and event calls of the same method are **not**
+  mutually exclusive; use service locks if they share state.
+- `stop()` prevents further scheduling, cancels queued invocations and waits for
+  running methods/guards. Python threads cannot forcibly interrupt a running
+  method: use bounded I/O and cooperative cancellation for long-running work.
+  Repeated `start()`/`stop()` calls are harmless, but a stopped agent cannot be
+  restarted; create a new agent instead. Jobs are not persisted across restarts.
+
+**Hard timing is deadline monitoring, not a hard real-time guarantee.** Python
+threads, the OS scheduler, guards and network requests can introduce delays.
+Only start deadlines are monitored; no completion deadline or forced timeout is
+provided. Use a real-time controller for operations requiring guaranteed deadlines.
+
+Run scheduler and existing watch regression tests with:
+
+```bash
+uv run python -m unittest discover -s tests -v
+```
+
 ## Known Limitations
 
 - **`registration_service`** is currently under development and not yet tested.

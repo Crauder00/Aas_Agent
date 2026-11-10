@@ -3,6 +3,9 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 import logging
+from typing import Literal
+
+from .periodic_operation import PeriodicOperation
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +47,43 @@ class BaseOperationService:
     def __init__(self) -> None:
         """Initialize the operation registry."""
         self._registry: dict[str, tuple[OperationConfig, Callable, Callable | None]] = {}
+        self._periodic_operations: list[PeriodicOperation] = []
+
+    def register_periodic(
+        self,
+        method: Callable[[], None],
+        interval_seconds: float,
+        *,
+        timing: Literal["soft", "hard"] = "soft",
+        max_lateness_seconds: float | None = None,
+        overlap: Literal["skip"] = "skip",
+        late_policy: Literal["skip", "run"] = "skip",
+        guard: Callable[[], GuardResult] | None = None,
+    ) -> None:
+        """Register a parameterless method before constructing AasAgent.
+
+        The first invocation is due one interval after agent startup. Missed
+        intervals are coalesced and an already pending/running job is skipped.
+        Hard timing requires a start tolerance; late_policy controls whether a
+        late hard invocation is skipped or still run after logging an error.
+        Soft invocations always run when idle, warning if a tolerance is exceeded.
+        """
+        operation = PeriodicOperation(
+            method=method,
+            interval_seconds=interval_seconds,
+            timing=timing,
+            max_lateness_seconds=max_lateness_seconds,
+            overlap=overlap,
+            late_policy=late_policy,
+            guard=guard,
+        )
+        if any(entry.method == method for entry in self._periodic_operations):
+            raise ValueError("Periodic method is already registered on this service")
+        self._periodic_operations.append(operation)
+
+    def get_periodic_operations(self) -> tuple[PeriodicOperation, ...]:
+        """Return a snapshot for the scheduler, separate from event topics."""
+        return tuple(self._periodic_operations)
 
 
     def register(
