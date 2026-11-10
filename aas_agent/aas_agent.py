@@ -6,6 +6,7 @@ from .config.aas_agent_config import AgentConfig
 from .core.base_operation_service import BaseOperationService
 from .core.event_handler import EventHandler
 from .core.event_listener import EventListener
+from .core.operation_scheduler import OperationScheduler
 from .services.registration_service.registration_service import RegistrationService
 
 logger = logging.getLogger(__name__)
@@ -25,19 +26,25 @@ class AasAgent:
             agent_config: Global agent configuration including MQTT and optional registration settings.
             services: List of operation services to register with the EventHandler.
         """
-        self._handler = EventHandler()
+        self._scheduler = OperationScheduler(services)
+        self._started = False
+        self._stopped = False
+        self._handler = EventHandler() if agent_config.event_mode == "enabled" else None
 
         # Register all services with the handler
         for service in services:
-            self._handler.register_service(service)
+            if self._handler is not None:
+                self._handler.register_service(service)
 
         # Bind the selected event source to the existing handler.
-        self._listener: EventListener = EventListener(
-            agent_config.listener
-            if agent_config.listener is not None
-            else agent_config.mqtt,
-            on_message=self._handler.handle,
-        )
+        self._listener = None
+        if self._handler is not None:
+            self._listener = EventListener(
+                agent_config.listener
+                if agent_config.listener is not None
+                else agent_config.mqtt,
+                on_message=self._handler.handle,
+            )
 
         # If no register_config is provided, registration is disabled
         self._registration_service = (
@@ -48,14 +55,35 @@ class AasAgent:
 
     def start(self) -> None:
         """Start the AAS EventListener and all services."""
+        if self._stopped:
+            raise RuntimeError("A stopped agent cannot be restarted")
+        if self._started:
+            return
         logger.info("AasAgent is starting...")
-        self._listener.start()
+        try:
+            if self._listener is not None:
+                self._listener.start()
+            self._scheduler.start()
+        except Exception:
+            self.stop()
+            raise
+        self._started = True
         logger.info("AasAgent is running.")
 
     def stop(self) -> None:
         """Stop the AAS EventListener and all services gracefully."""
+        if self._stopped:
+            self._scheduler.stop()
+            return
+        self._stopped = True
         logger.info("AasAgent is stopped...")
-        self._listener.stop()
+        self._scheduler.request_stop()
+        try:
+            if self._listener is not None:
+                self._listener.stop()
+        finally:
+            self._scheduler.stop()
+        self._started = False
         logger.info("AasAgent stopped.")
 
     def register(self) -> None:
